@@ -25,11 +25,11 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import com.wavemaker.commons.util.XMLUtils;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Created by Saraswathi Rekhala on 19/10/15.
@@ -38,10 +38,10 @@ public class XMLUtilsTest {
 
     @Test
     public void escapeTest() {
-        assertEquals(XMLUtils.escape("\"sample\""), "&quot;sample&quot;");
-        assertEquals(XMLUtils.escape("<sample>"), "&lt;sample&gt;");
-        assertEquals(XMLUtils.escape("&sample"), "&amp;sample");
-        assertEquals(XMLUtils.escape("\'sample\'"), "&apos;sample&apos;");
+        assertEquals("&quot;sample&quot;", XMLUtils.escape("\"sample\""));
+        assertEquals("&lt;sample&gt;", XMLUtils.escape("<sample>"));
+        assertEquals("&amp;sample", XMLUtils.escape("&sample"));
+        assertEquals("&apos;sample&apos;", XMLUtils.escape("\'sample\'"));
     }
 
     @Test
@@ -52,11 +52,11 @@ public class XMLUtilsTest {
         XMLStreamReader reader = factory.createXMLStreamReader(new FileReader(filePath));
         reader.next();
         Map<String, String> output = XMLUtils.attributesToMap(reader);
-        assertEquals(output.size(), 1);
+        assertEquals(1, output.size());
         Set<Map.Entry<String, String>> entries = output.entrySet();
         Map.Entry<String, String> entry = entries.iterator().next();
-        assertEquals(entry.getKey(), "id");
-        assertEquals(entry.getValue(), "100");
+        assertEquals("id", entry.getKey());
+        assertEquals("100", entry.getValue());
     }
 
     @Test
@@ -67,11 +67,11 @@ public class XMLUtilsTest {
         XMLStreamReader reader = factory.createXMLStreamReader(new FileReader(filePath));
         reader.next();
         Map<String, String> output = XMLUtils.attributesToMap("xyz", reader);
-        assertEquals(output.size(), 1);
+        assertEquals(1, output.size());
         Set<Map.Entry<String, String>> entries = output.entrySet();
         Map.Entry<String, String> entry = entries.iterator().next();
-        assertEquals(entry.getKey(), "xyz.id");
-        assertEquals(entry.getValue(), "100");
+        assertEquals("xyz.id", entry.getKey());
+        assertEquals("100", entry.getValue());
 
     }
 

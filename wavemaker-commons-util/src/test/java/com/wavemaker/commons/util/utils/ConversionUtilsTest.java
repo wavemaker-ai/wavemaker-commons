@@ -20,11 +20,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.core.io.Resource;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import com.wavemaker.commons.util.ConversionUtils;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Created by prithvit on 15/10/15.
@@ -44,10 +44,10 @@ public class ConversionUtilsTest {
             fileList.add(file2);
             fileList.add(file3);
             List<Resource> resources = ConversionUtils.convertToResourceList(fileList);
-            assertEquals(resources.size(), fileList.size());
-            assertEquals(resources.get(0).getFilename(), file1.getName());
-            assertEquals(resources.get(1).getFilename(), file2.getName());
-            assertEquals(resources.get(2).getFilename(), file3.getName());
+            assertEquals(fileList.size(), resources.size());
+            assertEquals(file1.getName(), resources.get(0).getFilename());
+            assertEquals(file2.getName(), resources.get(1).getFilename());
+            assertEquals(file3.getName(), resources.get(2).getFilename());
         } finally {
             file1.delete();
             file2.delete();

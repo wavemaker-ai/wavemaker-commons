@@ -19,18 +19,19 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Stream;
 
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import com.wavemaker.commons.util.TypeConversionUtils;
 
-import junit.framework.TestCase;
-
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Simon Toens
@@ -40,7 +41,7 @@ public class TypeConversionUtilsTest {
     @Test
     public void isPrimitiveTest() {
 
-        TestCase.assertFalse(TypeConversionUtils.isPrimitiveOrWrapper(Object.class));
+        assertFalse(TypeConversionUtils.isPrimitiveOrWrapper(Object.class));
         assertFalse(TypeConversionUtils.isPrimitiveOrWrapper(ClassUtilsObject.class));
 
         assertTrue(TypeConversionUtils.isPrimitiveOrWrapper(int.class));
@@ -151,23 +152,23 @@ public class TypeConversionUtilsTest {
         assertFalse(TypeConversionUtils.isServletClass(UUID.randomUUID().toString()));
     }
 
-    @Test(dataProvider = "primitiveDataTypes")
+    static Stream<Arguments> primitiveDataTypes() {
+        return Stream.of(
+            Arguments.of("boolean"),
+            Arguments.of("short"),
+            Arguments.of("int"),
+            Arguments.of("char"),
+            Arguments.of("float"),
+            Arguments.of("double"),
+            Arguments.of("byte")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("primitiveDataTypes")
     public void primitiveForNameTest(String className) {
         Class clazz = TypeConversionUtils.primitiveForName(className);
         assertNotNull(clazz);
-    }
-
-    @DataProvider(name = "primitiveDataTypes")
-    public Object[][] primitiveDataTypes() {
-        Object[][] obj = new Object[7][1];
-        obj[0][0] = "boolean";
-        obj[1][0] = "short";
-        obj[2][0] = "int";
-        obj[3][0] = "char";
-        obj[4][0] = "float";
-        obj[5][0] = "double";
-        obj[6][0] = "byte";
-        return obj;
     }
 
     @Test

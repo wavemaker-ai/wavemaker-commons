@@ -27,12 +27,8 @@ dependencies {
     implementation(appDependenciesLibs.gson)
     implementation(appDependenciesLibs.jakarta.xml.bind.api)
     compileOnly(appDependenciesLibs.jakarta.servlet.api)
-    testImplementation(appDependenciesLibs.test.testng)
     testImplementation(appDependenciesLibs.test.mockito.core)
-    testImplementation(appDependenciesLibs.test.hamcrest)
-    testImplementation(appDependenciesLibs.test.junit4) {
-        exclude("org.hamcrest", "*")
-    }
+    testImplementation(appDependenciesLibs.test.mockito.junit.jupiter)
     testImplementation(appDependenciesLibs.jakarta.servlet.api)
     testImplementation(appDependenciesLibs.jaxb.impl)
 }
@@ -50,7 +46,12 @@ artifacts {
     add("testConfiguration", tasks.getByName("testsJar"))
 }
 
-tasks.test {
+testing {
+    suites {
+        val test by getting(JvmTestSuite::class) {
+            useJUnitJupiter(libs.versions.junit.get())
+        }
+    }
 }
 
 javaLibraryMavenPublish {

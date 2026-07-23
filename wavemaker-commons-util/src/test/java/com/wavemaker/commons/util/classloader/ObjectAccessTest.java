@@ -14,13 +14,13 @@
  ******************************************************************************/
 package com.wavemaker.commons.util.classloader;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import com.wavemaker.commons.util.ObjectAccess;
 import com.wavemaker.commons.util.utils.Car;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Created by Prithvi Medavaram on 13/10/15.

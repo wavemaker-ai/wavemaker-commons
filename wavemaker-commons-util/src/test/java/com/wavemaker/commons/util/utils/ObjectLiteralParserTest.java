@@ -16,13 +16,13 @@ package com.wavemaker.commons.util.utils;
 
 import java.util.List;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import com.wavemaker.commons.util.CastUtils;
 import com.wavemaker.commons.util.ObjectLiteralParser;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Simon Toens

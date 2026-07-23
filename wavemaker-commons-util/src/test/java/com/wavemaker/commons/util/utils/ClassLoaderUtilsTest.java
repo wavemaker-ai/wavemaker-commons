@@ -14,12 +14,12 @@
  ******************************************************************************/
 package com.wavemaker.commons.util.utils;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import com.wavemaker.commons.classloader.ClassLoaderUtils;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * @author Matt Small

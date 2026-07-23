@@ -14,9 +14,12 @@
  ******************************************************************************/
 package com.wavemaker.commons.web.filter;
 
-import org.testng.Assert;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Uday Shankar
@@ -24,36 +27,35 @@ import org.testng.annotations.Test;
 
 public class ServerTimingMetricTest {
 
-    @Test(dataProvider = "testDataProvider")
-    private void parseTest(String s, String name, Long processingTime, String description, Class throwableClass, String expectedAsString) {
-        if (throwableClass != null) {
-            Assert.assertThrows(throwableClass, () -> ServerTimingMetric.parse(s));
-        } else {
-            ServerTimingMetric serverTimingMetric = ServerTimingMetric.parse(s);
-            Assert.assertEquals(serverTimingMetric.getName(), name);
-            Assert.assertEquals(serverTimingMetric.getProcessingTime(), processingTime);
-            Assert.assertEquals(serverTimingMetric.getDescription(), description);
-            Assert.assertEquals(serverTimingMetric.asString(), expectedAsString);
-        }
+    static Stream<Arguments> testDataProvider() {
+        return Stream.of(
+            Arguments.of("cache;desc=\"Cache Read\";dur=23", "cache", 23L, "Cache Read", null, "cache(Cache Read);dur=23"),
+            Arguments.of("cache;desc=Cache Read;dur=23", "cache", 23L, "Cache Read", null, "cache(Cache Read);dur=23"),
+            Arguments.of("cache;dur=23", "cache", 23L, null, null, "cache;dur=23"),
+            Arguments.of("cache;desc=Cache Read", "cache", null, "Cache Read", null, "cache(Cache Read)"),
+            Arguments.of("cache;desc=\"", "cache", null, "Cache Read", IllegalArgumentException.class, null),
+            Arguments.of("cache", "cache", null, null, null, "cache"),
+            Arguments.of(" cache", "cache", null, null, null, "cache"),
+            Arguments.of("cache ", "cache", null, null, null, "cache"),
+            Arguments.of(" cache ", "cache", null, null, null, "cache"),
+            Arguments.of(null, null, null, null, IllegalArgumentException.class, null),
+            Arguments.of("====", null, null, null, IllegalArgumentException.class, null),
+            Arguments.of("   cache     ;   desc=     \"Cache Read\"    ;   dur  =    23    ", "cache", 23L, "Cache Read", null, "cache(Cache Read);dur=23"),
+            Arguments.of("   cache     ;desc=     \"Cache Read\"    ;   dur  =    23  ; abcd = ndhcsj  ", "cache", 23L, "Cache Read", null, "cache(Cache Read);dur=23")
+        );
     }
 
-    @DataProvider(name = "testDataProvider")
-    public Object[][] testDataProvider() {
-        return new Object[][]{
-            new Object[]{"cache;desc=\"Cache Read\";dur=23", "cache", 23l, "Cache Read", null, "cache(Cache Read);dur=23"},
-            new Object[]{"cache;desc=Cache Read;dur=23", "cache", 23l, "Cache Read", null, "cache(Cache Read);dur=23"},
-            new Object[]{"cache;dur=23", "cache", 23l, null, null, "cache;dur=23"},
-            new Object[]{"cache;desc=Cache Read", "cache", null, "Cache Read", null, "cache(Cache Read)"},
-            new Object[]{"cache;desc=\"", "cache", null, "Cache Read", IllegalArgumentException.class, null},
-            new Object[]{"cache", "cache", null, null, null, "cache"},
-            new Object[]{" cache", "cache", null, null, null, "cache"},
-            new Object[]{"cache ", "cache", null, null, null, "cache"},
-            new Object[]{" cache ", "cache", null, null, null, "cache"},
-            new Object[]{null, null, null, null, IllegalArgumentException.class, null},
-            new Object[]{"====", null, null, null, IllegalArgumentException.class, null},
-            new Object[]{"   cache     ;   desc=     \"Cache Read\"    ;   dur  =    23    ", "cache", 23l, "Cache Read", null, "cache(Cache Read);dur=23"},
-            new Object[]{"   cache     ;desc=     \"Cache Read\"    ;   dur  =    23  ; abcd = ndhcsj  ", "cache", 23l, "Cache Read", null, "cache(Cache Read);" +
-                "dur=23"},
-        };
+    @ParameterizedTest
+    @MethodSource("testDataProvider")
+    public void parseTest(String s, String name, Long processingTime, String description, Class throwableClass, String expectedAsString) {
+        if (throwableClass != null) {
+            assertThrows(throwableClass, () -> ServerTimingMetric.parse(s));
+        } else {
+            ServerTimingMetric serverTimingMetric = ServerTimingMetric.parse(s);
+            assertEquals(serverTimingMetric.getName(), name);
+            assertEquals(serverTimingMetric.getProcessingTime(), processingTime);
+            assertEquals(serverTimingMetric.getDescription(), description);
+            assertEquals(serverTimingMetric.asString(), expectedAsString);
+        }
     }
 }

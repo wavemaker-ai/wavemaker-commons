@@ -16,11 +16,11 @@ package com.wavemaker.commons.json.module;
 
 import java.io.IOException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.Assert;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -38,7 +38,7 @@ public class WMJacksonModuleTest {
 
     private A a;
 
-    @Before
+    @BeforeEach
     public void init() {
         objectMapper = new ObjectMapper();
 
@@ -51,13 +51,10 @@ public class WMJacksonModuleTest {
         c.setA(a);
     }
 
-    @Test(expected = JsonMappingException.class)
+    @Test
     public void test1() throws JsonProcessingException {
-
-        final String valueAsString = objectMapper.writeValueAsString(a);
-
-        LOGGER.info(valueAsString);
-
+        assertThrows(JsonMappingException.class,
+            () -> objectMapper.writeValueAsString(a));
     }
 
     @Test
@@ -67,7 +64,7 @@ public class WMJacksonModuleTest {
 
         final String valueAsString = objectMapper.writeValueAsString(a);
 
-        Assert.assertEquals("{\"value\":\"a value\",\"b\":{\"value\":\"b value\",\"c\":{\"value\":\"c value\"," +
+        assertEquals("{\"value\":\"a value\",\"b\":{\"value\":\"b value\",\"c\":{\"value\":\"c value\"," +
             "\"a\":null}}}", valueAsString);
 
     }
@@ -80,10 +77,10 @@ public class WMJacksonModuleTest {
         try {
             objectMapper.writeValueAsString(a);
 
-            Assert.fail("Should throw cyclic reference issue.");
+            fail("Should throw cyclic reference issue.");
 
         } catch (JsonProcessingException e) {
-            Assert.assertEquals("Cyclic-reference leading to cycle, Object Reference Stack:A->B->C (through reference" +
+            assertEquals("Cyclic-reference leading to cycle, Object Reference Stack:A->B->C (through reference" +
                 " chain: com.wavemaker.commons.json.module.A[\"b\"]->com.wavemaker.commons.json.module" +
                 ".B[\"c\"]->com.wavemaker.commons.json.module.C[\"a\"])", e.getMessage());
         }
@@ -96,12 +93,12 @@ public class WMJacksonModuleTest {
         final Swagger swagger = objectMapper
             .readValue(this.getClass().getResourceAsStream("/hrdb_API.json"), Swagger.class);
 
-        Assert.assertNotNull(swagger, "Could not get swagger object from json.");
+        assertNotNull(swagger, "Could not get swagger object from json.");
 
         objectMapper.registerModule(new WMJacksonModule(true));
 
         final String string = objectMapper.writeValueAsString(swagger);
-        Assert.assertNotNull(string, "Could not convert swagger object to json.");
+        assertNotNull(string, "Could not convert swagger object to json.");
 
     }
 

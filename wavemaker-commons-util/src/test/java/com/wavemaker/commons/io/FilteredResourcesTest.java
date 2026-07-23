@@ -16,19 +16,21 @@ package com.wavemaker.commons.io;
 
 import java.util.Iterator;
 
-import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 /**
  * Tests for {@link FilteredResources}.
  *
  * @author Phillip Webb
  */
+@ExtendWith(MockitoExtension.class)
 public class FilteredResourcesTest {
 
     @Mock
@@ -48,9 +50,8 @@ public class FilteredResourcesTest {
 
     private Resources<File> resources;
 
-    @Before
+    @BeforeEach
     public void setup() {
-        MockitoAnnotations.initMocks(this);
         this.resources = new ResourcesCollection<>(this.source, this.fileA, this.fileB, this.fileC, this.fileD);
     }
 
@@ -69,9 +70,9 @@ public class FilteredResourcesTest {
     private void assertMatches(Resources<File> actual, File... expected) {
         Iterator<File> iterator = actual.iterator();
         for (File file : expected) {
-            assertThat(iterator.next(), Matchers.is(file));
+            assertSame(file, iterator.next());
         }
-        assertThat(iterator.hasNext(), Matchers.is(false));
+        assertFalse(iterator.hasNext());
     }
 
     private ResourceFilter filterOn(final Resource on) {

@@ -26,19 +26,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.api.Test;
+
+import java.util.stream.Stream;
 
 import com.wavemaker.commons.util.FileAccessException;
 import com.wavemaker.commons.util.WMFileUtils;
 import com.wavemaker.commons.util.WMIOUtils;
 import com.wavemaker.commons.util.WMTestUtils;
 
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Matt Small
@@ -47,14 +51,13 @@ public class WMIOUtilsTest {
 
     private File tempDir;
 
-    @BeforeClass
+    @BeforeEach
     public void setUp() throws Exception {
         this.tempDir = WMIOUtils.createTempDirectory();
     }
 
-    @AfterClass
+    @AfterEach
     public void tearDown() throws Exception {
-
         WMIOUtils.deleteRecursive(this.tempDir);
     }
 
@@ -302,7 +305,8 @@ public class WMIOUtilsTest {
         }
     }
 
-    @Test(dataProvider = "streamProvider")
+    @ParameterizedTest
+    @MethodSource("streamProvider")
     public void copyStreamTest(String inputString) throws IOException {
         ByteArrayInputStream byteArrayInputStream = null;
         ByteArrayOutputStream byteArrayOutputStream = null;
@@ -310,24 +314,23 @@ public class WMIOUtilsTest {
             byteArrayInputStream = new ByteArrayInputStream(inputString.getBytes());
             byteArrayOutputStream = new ByteArrayOutputStream();
             int size = WMIOUtils.copy(byteArrayInputStream, byteArrayOutputStream);
-            Assert.assertEquals(size, inputString.length());
-            Assert.assertEquals(byteArrayOutputStream.toString(), inputString);
+            Assertions.assertEquals(size, inputString.length());
+            Assertions.assertEquals(byteArrayOutputStream.toString(), inputString);
         } finally {
             WMIOUtils.closeSilently(byteArrayInputStream);
             WMIOUtils.closeSilently(byteArrayOutputStream);
         }
     }
 
-    @DataProvider
-    public Object[][] streamProvider() {
-        Object[][] obj = new Object[2][1];
-        obj[0][0] = UUID.randomUUID().toString();
-        obj[1][0] = "";
-
-        return obj;
+    static Stream<Arguments> streamProvider() {
+        return Stream.of(
+            Arguments.of(UUID.randomUUID().toString()),
+            Arguments.of("")
+        );
     }
 
-    @Test(dataProvider = "streamProvider")
+    @ParameterizedTest
+    @MethodSource("streamProvider")
     public void closeSilentlyTest(String inputString) {
         final boolean[] isClosed = {false};
         ByteArrayInputStream byteArrayInputStream = getByteArrayInputStream(inputString, isClosed);
@@ -336,7 +339,8 @@ public class WMIOUtilsTest {
 
     }
 
-    @Test(dataProvider = "streamProvider")
+    @ParameterizedTest
+    @MethodSource("streamProvider")
     public void closeByLoggingTest(String inputString) {
         final boolean[] isClosed = {false};
         ByteArrayInputStream byteArrayInputStream = getByteArrayInputStream(inputString, isClosed);
@@ -349,7 +353,7 @@ public class WMIOUtilsTest {
     public void testTail() throws IOException {
         File file = new File("build", "testFileOne.txt");
         WMIOUtils.write(file, "adding data to a file\ndata1\ndata2");
-        Assert.assertEquals(WMIOUtils.tail(file, 2), "data1\ndata2\n");
+        Assertions.assertEquals(WMIOUtils.tail(file, 2), "data1\ndata2\n");
 
     }
 
@@ -359,8 +363,8 @@ public class WMIOUtilsTest {
         WMIOUtils.write(file, "adding data to a file\ndata1\ndata2");
         File tempFile = new File("build", "temporary.txt");
         WMIOUtils.write(tempFile, "it is a temporary file");
-        Assert.assertTrue(WMIOUtils.compare(new FileInputStream(file), new FileInputStream(file)));
-        Assert.assertFalse(WMIOUtils.compare(new FileInputStream(file), new FileInputStream(tempFile)));
+        Assertions.assertTrue(WMIOUtils.compare(new FileInputStream(file), new FileInputStream(file)));
+        Assertions.assertFalse(WMIOUtils.compare(new FileInputStream(file), new FileInputStream(tempFile)));
     }
 
     @Test
@@ -369,22 +373,22 @@ public class WMIOUtilsTest {
         File destFile = new File("build", "dest.txt");
         WMIOUtils.write(sourceFile, "temporary file inputs fo copy test");
         WMIOUtils.copy(sourceFile, destFile, "noExcludeInput", "noExcludePattern");
-        Assert.assertTrue(WMIOUtils.compare(new FileInputStream(sourceFile), new FileInputStream(destFile)));
+        Assertions.assertTrue(WMIOUtils.compare(new FileInputStream(sourceFile), new FileInputStream(destFile)));
     }
 
     @Test
     public void testUtf8CharWriteToFile() throws IOException {
         File file = new File("build", "testUtf8Char.txt");
         WMIOUtils.write(file, "కొన్ని రాండమ్ డాటాతో ఫైల్ను జనాదరణ పొందింది\nలైన్ 1\nలైన్ 2");
-        Assert.assertEquals(WMIOUtils.read(file), "కొన్ని రాండమ్ డాటాతో ఫైల్ను జనాదరణ పొందింది\nలైన్ 1\nలైన్ 2");
-        Assert.assertEquals(WMIOUtils.tail(file, 2), "లైన్ 1\nలైన్ 2\n");
+        Assertions.assertEquals(WMIOUtils.read(file), "కొన్ని రాండమ్ డాటాతో ఫైల్ను జనాదరణ పొందింది\nలైన్ 1\nలైన్ 2");
+        Assertions.assertEquals(WMIOUtils.tail(file, 2), "లైన్ 1\nలైన్ 2\n");
     }
 
     @Test
     public void testUtf8CharWriteToOutputStream() throws IOException {
         File file = new File("build", "testUtf8Char.txt");
         WMIOUtils.write(new FileOutputStream(file), "నమూనా డేటా");
-        Assert.assertEquals(WMIOUtils.read(file), "నమూనా డేటా");
+        Assertions.assertEquals(WMIOUtils.read(file), "నమూనా డేటా");
     }
 
     @Test
@@ -392,7 +396,7 @@ public class WMIOUtilsTest {
         final boolean[] isClosed = {false};
         File file = new File("build", "testUtf8Char.txt");
         WMIOUtils.copy(getByteArrayInputStream("నమూనా డేటా", isClosed), new FileOutputStream(file));
-        Assert.assertEquals(WMIOUtils.read(file), "నమూనా డేటా");
+        Assertions.assertEquals(WMIOUtils.read(file), "నమూనా డేటా");
     }
 
     @Test
@@ -401,7 +405,7 @@ public class WMIOUtilsTest {
         FileWriter fileWriter = new FileWriter(file);
         WMIOUtils.copy(new StringReader("నమూనా డేటా"), fileWriter);
         fileWriter.close();
-        Assert.assertEquals(WMIOUtils.read(file), "నమూనా డేటా");
+        Assertions.assertEquals(WMIOUtils.read(file), "నమూనా డేటా");
     }
 
     private ByteArrayInputStream getByteArrayInputStream(final String inputString, final boolean[] isClosed) {

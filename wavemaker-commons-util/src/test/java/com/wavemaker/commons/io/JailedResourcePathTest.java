@@ -14,12 +14,12 @@
  ******************************************************************************/
 package com.wavemaker.commons.io;
 
-import org.hamcrest.Matchers;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests for {@link JailedResourcePath}.
@@ -28,52 +28,45 @@ import static org.junit.Assert.assertThat;
  */
 public class JailedResourcePathTest {
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     private final ResourcePath pathA = new ResourcePath().get("a");
 
     private final ResourcePath pathB = new ResourcePath().get("b");
 
     @Test
     public void shouldNeedJail() throws Exception {
-        this.thrown.expect(IllegalArgumentException.class);
-        this.thrown.expectMessage("JailPath must not be null");
-        new JailedResourcePath(null, new ResourcePath());
+        assertThrows(IllegalArgumentException.class, () -> new JailedResourcePath(null, new ResourcePath()));
     }
 
     @Test
     public void shouldNeedPath() throws Exception {
-        this.thrown.expect(IllegalArgumentException.class);
-        this.thrown.expectMessage("Path must not be null");
-        new JailedResourcePath(new ResourcePath(), null);
+        assertThrows(IllegalArgumentException.class, () -> new JailedResourcePath(new ResourcePath(), null));
     }
 
     @Test
     public void shouldCreateFromJailAndPath() throws Exception {
         JailedResourcePath jailedResourcePath = new JailedResourcePath(this.pathA, this.pathB);
-        assertThat(jailedResourcePath.getJailPath(), Matchers.is(this.pathA));
-        assertThat(jailedResourcePath.getPath(), Matchers.is(this.pathB));
+        assertEquals(this.pathA, jailedResourcePath.getJailPath());
+        assertEquals(this.pathB, jailedResourcePath.getPath());
     }
 
     @Test
     public void shouldCreateRoot() throws Exception {
         JailedResourcePath jailedResourcePath = new JailedResourcePath();
-        assertThat(jailedResourcePath.getJailPath().isRootPath(), Matchers.is(true));
-        assertThat(jailedResourcePath.getPath().isRootPath(), Matchers.is(true));
+        assertTrue(jailedResourcePath.getJailPath().isRootPath());
+        assertTrue(jailedResourcePath.getPath().isRootPath());
     }
 
     @Test
     public void shouldGetNullParent() throws Exception {
         JailedResourcePath jailedResourcePath = new JailedResourcePath(this.pathA, new ResourcePath());
-        assertThat(jailedResourcePath.getParent(), Matchers.is(Matchers.nullValue()));
+        assertNull(jailedResourcePath.getParent());
     }
 
     @Test
     public void shouldGetParent() throws Exception {
         JailedResourcePath jailedResourcePath = new JailedResourcePath(this.pathA, new ResourcePath().get("b/c"));
         JailedResourcePath expected = new JailedResourcePath(this.pathA, this.pathB);
-        assertThat(jailedResourcePath.getParent(), Matchers.is(Matchers.equalTo(expected)));
+        assertEquals(expected, jailedResourcePath.getParent());
     }
 
     @Test
@@ -81,25 +74,25 @@ public class JailedResourcePathTest {
         JailedResourcePath jailedResourcePath = new JailedResourcePath(this.pathA, new ResourcePath());
         jailedResourcePath = jailedResourcePath.get("b/c");
         JailedResourcePath expected = new JailedResourcePath(this.pathA, new ResourcePath().get("b/c"));
-        assertThat(jailedResourcePath, Matchers.is(Matchers.equalTo(expected)));
+        assertEquals(expected, jailedResourcePath);
 
     }
 
     @Test
     public void shouldGetUnjailedRootPath() throws Exception {
         JailedResourcePath jailedResourcePath = new JailedResourcePath(new ResourcePath(), this.pathA);
-        assertThat(jailedResourcePath.getUnjailedPath(), Matchers.is(Matchers.equalTo(new ResourcePath().get("a"))));
+        assertEquals(new ResourcePath().get("a"), jailedResourcePath.getUnjailedPath());
     }
 
     @Test
     public void shouldGetUnjailedPath() throws Exception {
         JailedResourcePath jailedResourcePath = new JailedResourcePath(this.pathA, this.pathB);
-        assertThat(jailedResourcePath.getUnjailedPath(), Matchers.is(Matchers.equalTo(new ResourcePath().get("a/b"))));
+        assertEquals(new ResourcePath().get("a/b"), jailedResourcePath.getUnjailedPath());
     }
 
     @Test
     public void shouldUsePathToString() throws Exception {
         JailedResourcePath jailedResourcePath = new JailedResourcePath(this.pathA, this.pathB);
-        assertThat(jailedResourcePath.toString(), Matchers.is(Matchers.equalTo("/b")));
+        assertEquals("/b", jailedResourcePath.toString());
     }
 }

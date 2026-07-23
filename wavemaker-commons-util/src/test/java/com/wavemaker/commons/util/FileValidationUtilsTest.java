@@ -18,17 +18,18 @@ package com.wavemaker.commons.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.wavemaker.commons.WMRuntimeException;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class FileValidationUtilsTest {
 
     private List<String> positiveCase;
     private List<String> negativeCase;
 
-    @Before
+    @BeforeEach
     public void initialize() {
         positiveCase = new ArrayList<>();
         positiveCase.add("/etc/master.passwd");
@@ -46,8 +47,9 @@ public class FileValidationUtilsTest {
         positiveCase.forEach(FileValidationUtils::validateFilePath);
     }
 
-    @Test(expected = WMRuntimeException.class)
+    @Test
     public void validateFilePathThrowsWMRuntimeExceptionWhenPathContainsDots() {
-        negativeCase.forEach(FileValidationUtils::validateFilePath);
+        assertThrows(WMRuntimeException.class,
+            () -> negativeCase.forEach(FileValidationUtils::validateFilePath));
     }
 }

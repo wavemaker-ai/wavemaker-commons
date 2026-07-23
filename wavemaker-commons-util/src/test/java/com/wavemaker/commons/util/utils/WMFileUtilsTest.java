@@ -19,11 +19,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.UUID;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import com.wavemaker.commons.util.WMFileUtils;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /*
  * Created by prithvi on 12/10/15.
@@ -40,7 +40,7 @@ public class WMFileUtilsTest {
         printWriter.close();
 
         String testFileExpectedData = WMFileUtils.readFileToString(testFileActual);
-        assertEquals(actualData, testFileExpectedData);
+        assertEquals(testFileExpectedData, actualData);
         testFileActual.deleteOnExit();
     }
 
@@ -54,7 +54,7 @@ public class WMFileUtilsTest {
 
         String expectedData = WMFileUtils.readFileToString(testFileActual);
 
-        assertEquals(actualData, expectedData);
+        assertEquals(expectedData, actualData);
         testFileActual.deleteOnExit();
     }
 }

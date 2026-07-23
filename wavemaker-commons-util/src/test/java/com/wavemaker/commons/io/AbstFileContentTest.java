@@ -23,12 +23,12 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 
-import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for {@link AbstractFileContent}.
@@ -45,7 +45,7 @@ public class AbstFileContentTest {
 
     private AbstractFileContent content;
 
-    @Before
+    @BeforeEach
     public void setup() {
         this.outputStream = Mockito.spy(new ByteArrayOutputStream());
         this.inputStream = Mockito.spy(new ByteArrayInputStream(this.CONTENT.getBytes()));
@@ -73,7 +73,7 @@ public class AbstFileContentTest {
         char[] cbuf = new char[4];
         Reader reader = this.content.asReader();
         reader.read(cbuf);
-        assertThat(cbuf, Matchers.is(Matchers.equalTo(this.CONTENT.toCharArray())));
+        assertArrayEquals(this.CONTENT.toCharArray(), cbuf);
         reader.close();
         Mockito.verify(this.inputStream).close();
     }
@@ -81,14 +81,14 @@ public class AbstFileContentTest {
     @Test
     public void shouldGetAsString() throws Exception {
         String string = this.content.asString();
-        assertThat(string, Matchers.is(Matchers.equalTo(this.CONTENT)));
+        assertEquals(this.CONTENT, string);
         Mockito.verify(this.inputStream).close();
     }
 
     @Test
     public void shouldGetAsBytes() throws Exception {
         byte[] bytes = this.content.asBytes();
-        assertThat(bytes, Matchers.is(Matchers.equalTo(this.CONTENT.getBytes())));
+        assertArrayEquals(this.CONTENT.getBytes(), bytes);
         Mockito.verify(this.inputStream).close();
     }
 
@@ -96,7 +96,7 @@ public class AbstFileContentTest {
     public void shouldCopyToOutputStream() throws Exception {
         ByteArrayOutputStream copyStream = Mockito.spy(new ByteArrayOutputStream());
         this.content.copyTo(copyStream);
-        assertThat(copyStream.toByteArray(), Matchers.is(Matchers.equalTo(this.CONTENT.getBytes())));
+        assertArrayEquals(this.CONTENT.getBytes(), copyStream.toByteArray());
         Mockito.verify(this.inputStream).close();
         Mockito.verify(copyStream).close();
     }
@@ -105,7 +105,7 @@ public class AbstFileContentTest {
     public void shouldCopyToWriter() throws Exception {
         StringWriter writer = Mockito.spy(new StringWriter());
         this.content.copyTo(writer);
-        assertThat(writer.toString(), Matchers.is(Matchers.equalTo(this.CONTENT)));
+        assertEquals(this.CONTENT, writer.toString());
         Mockito.verify(this.inputStream).close();
         Mockito.verify(writer).close();
     }
@@ -115,7 +115,7 @@ public class AbstFileContentTest {
         Writer writer = this.content.asWriter();
         writer.write(this.CONTENT.toCharArray());
         writer.close();
-        assertThat(this.outputStream.toByteArray(), Matchers.is(this.CONTENT.getBytes()));
+        assertArrayEquals(this.CONTENT.getBytes(), this.outputStream.toByteArray());
         Mockito.verify(this.outputStream).close();
     }
 
@@ -124,7 +124,7 @@ public class AbstFileContentTest {
         OutputStream outputStream = this.content.asOutputStream();
         outputStream.write(this.CONTENT.getBytes());
         outputStream.close();
-        assertThat(this.outputStream.toByteArray(), Matchers.is(Matchers.equalTo(this.CONTENT.getBytes())));
+        assertArrayEquals(this.CONTENT.getBytes(), this.outputStream.toByteArray());
         Mockito.verify(this.outputStream).close();
     }
 
@@ -132,7 +132,7 @@ public class AbstFileContentTest {
     public void shouldWriteReader() throws Exception {
         StringReader reader = Mockito.spy(new StringReader(this.CONTENT));
         this.content.write(reader);
-        assertThat(this.outputStream.toByteArray(), Matchers.is(Matchers.equalTo(this.CONTENT.getBytes())));
+        assertArrayEquals(this.CONTENT.getBytes(), this.outputStream.toByteArray());
         Mockito.verify(reader).close();
         Mockito.verify(this.outputStream).close();
     }
@@ -140,7 +140,7 @@ public class AbstFileContentTest {
     @Test
     public void shouldWriteString() throws Exception {
         this.content.write(this.CONTENT);
-        assertThat(this.outputStream.toByteArray(), Matchers.is(Matchers.equalTo(this.CONTENT.getBytes())));
+        assertArrayEquals(this.CONTENT.getBytes(), this.outputStream.toByteArray());
         Mockito.verify(this.outputStream).close();
     }
 }

@@ -18,7 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.testng.Assert;
+import org.junit.jupiter.api.Assertions;
 
 public class WMTestUtils {
 
@@ -46,11 +46,11 @@ public class WMTestUtils {
             String expectedStr = WMFileUtils.readFileToString(expected);
             String actualStr = WMFileUtils.readFileToString(actual);
 
-            Assert.assertEquals(actualStr, expectedStr, msg);
+            Assertions.assertEquals(expectedStr, actualStr, msg);
         } else if (expected.isDirectory() && actual.isDirectory()) {
-            Assert.assertEquals(msg, expected.getAbsolutePath(), actual.getAbsolutePath());
+            Assertions.assertEquals(expected.getAbsolutePath(), actual.getAbsolutePath(), msg);
         } else {
-            Assert.fail(msg);
+            Assertions.fail(msg);
         }
     }
 

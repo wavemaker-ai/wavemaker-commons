@@ -14,19 +14,22 @@
  ******************************************************************************/
 package com.wavemaker.commons.io;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import com.wavemaker.commons.io.FilterOn.PathStyle;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 
 
@@ -35,50 +38,51 @@ import static org.mockito.Mockito.any;
  *
  * @author Phillip Webb
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class FilterOnTest {
 
     @Mock
     private ResourceFilterContext context;
 
-    @Before
+    @BeforeEach
     public void setup() {
-        MockitoAnnotations.initMocks(this);
     }
 
     @Test
     public void shouldSupportCompoundFilters() throws Exception {
         ResourceFilter filter = FilterOn.names().starting("~").ending(".tmp", ".bak").notContaining("keep");
-        assertThat(filter.match(this.context, fileWithName("~file.tmp")), is(true));
-        assertThat(filter.match(this.context, fileWithName("~file.bak")), is(true));
-        assertThat(filter.match(this.context, fileWithName("file.tmp")), is(false));
-        assertThat(filter.match(this.context, fileWithName("~file.dat")), is(false));
-        assertThat(filter.match(this.context, fileWithName("~xxkeepxx.bak")), is(false));
+        assertTrue(filter.match(this.context, fileWithName("~file.tmp")));
+        assertTrue(filter.match(this.context, fileWithName("~file.bak")));
+        assertFalse(filter.match(this.context, fileWithName("file.tmp")));
+        assertFalse(filter.match(this.context, fileWithName("~file.dat")));
+        assertFalse(filter.match(this.context, fileWithName("~xxkeepxx.bak")));
     }
 
     @Test
     public void shouldFilterHiddenResources() throws Exception {
         ResourceFilter filter = FilterOn.hidden();
-        assertThat(filter.match(this.context, fileWithName(".hidden")), is(true));
-        assertThat(filter.match(this.context, fileWithName("nothidden")), is(false));
-        assertThat(filter.match(this.context, folderWithName(".hidden")), is(true));
-        assertThat(filter.match(this.context, folderWithName("nothidden")), is(false));
+        assertTrue(filter.match(this.context, fileWithName(".hidden")));
+        assertFalse(filter.match(this.context, fileWithName("nothidden")));
+        assertTrue(filter.match(this.context, folderWithName(".hidden")));
+        assertFalse(filter.match(this.context, folderWithName("nothidden")));
     }
 
     @Test
     public void shouldFilterNonHiddenResources() throws Exception {
         ResourceFilter filter = FilterOn.nonHidden();
-        assertThat(filter.match(this.context, fileWithName(".hidden")), is(false));
-        assertThat(filter.match(this.context, fileWithName("nothidden")), is(true));
-        assertThat(filter.match(this.context, folderWithName(".hidden")), is(false));
-        assertThat(filter.match(this.context, folderWithName("nothidden")), is(true));
+        assertFalse(filter.match(this.context, fileWithName(".hidden")));
+        assertTrue(filter.match(this.context, fileWithName("nothidden")));
+        assertFalse(filter.match(this.context, folderWithName(".hidden")));
+        assertTrue(filter.match(this.context, folderWithName("nothidden")));
     }
 
     @Test
     public void shouldFilterOnPatternWithFullPathStyle() throws Exception {
         ResourceFilter filter = FilterOn.antPattern(PathStyle.FULL, "/dojo/**/tests/**");
-        assertThat(filter.match(this.context, folderWithPath("/dojo/folder/tests/file.js")), is(true));
-        assertThat(filter.match(this.context, folderWithPath("/dojo/some/folder/tests/file.js")), is(true));
-        assertThat(filter.match(this.context, folderWithPath("/dojo/some/folder/tests/another/file.js")), is(true));
+        assertTrue(filter.match(this.context, folderWithPath("/dojo/folder/tests/file.js")));
+        assertTrue(filter.match(this.context, folderWithPath("/dojo/some/folder/tests/file.js")));
+        assertTrue(filter.match(this.context, folderWithPath("/dojo/some/folder/tests/another/file.js")));
     }
 
     @Test
@@ -86,9 +90,9 @@ public class FilterOnTest {
         Folder source = folderWithPath("/x/");
         BDDMockito.given(this.context.getSource()).willReturn(source);
         ResourceFilter filter = FilterOn.antPattern("dojo/**/tests/**");
-        assertThat(filter.match(this.context, folderWithPath("/x/dojo/folder/tests/file.js")), is(true));
-        assertThat(filter.match(this.context, folderWithPath("/x/dojo/some/folder/tests/file.js")), is(true));
-        assertThat(filter.match(this.context, folderWithPath("/x/dojo/some/folder/tests/another/file.js")), is(true));
+        assertTrue(filter.match(this.context, folderWithPath("/x/dojo/folder/tests/file.js")));
+        assertTrue(filter.match(this.context, folderWithPath("/x/dojo/some/folder/tests/file.js")));
+        assertTrue(filter.match(this.context, folderWithPath("/x/dojo/some/folder/tests/another/file.js")));
     }
 
     @Test
@@ -96,63 +100,63 @@ public class FilterOnTest {
         Folder source = folderWithPath("/");
         BDDMockito.given(this.context.getSource()).willReturn(source);
         ResourceFilter filter = FilterOn.antPattern("/dojo/**/tests/**");
-        assertThat(filter.match(this.context, folderWithPath("/dojo/folder/tests/file.js")), is(true));
-        assertThat(filter.match(this.context, folderWithPath("/dojo/some/folder/tests/file.js")), is(true));
-        assertThat(filter.match(this.context, folderWithPath("/dojo/some/folder/tests/another/file.js")), is(true));
+        assertTrue(filter.match(this.context, folderWithPath("/dojo/folder/tests/file.js")));
+        assertTrue(filter.match(this.context, folderWithPath("/dojo/some/folder/tests/file.js")));
+        assertTrue(filter.match(this.context, folderWithPath("/dojo/some/folder/tests/another/file.js")));
     }
 
     @Test
     public void testCaseSensitiveNames() throws Exception {
         ResourceFilter filter = FilterOn.caseSensitiveNames().starting("~").ending(".tmp", ".bak");
-        assertThat(filter.match(this.context, fileWithName("~file.tmp")), is(true));
-        assertThat(filter.match(this.context, fileWithName("~file.bak")), is(true));
-        assertThat(filter.match(this.context, fileWithName("file.tmp")), is(false));
-        assertThat(filter.match(this.context, fileWithName("~file.dat")), is(false));
-        assertThat(filter.match(this.context, fileWithName("~xxkeepxx.bak")), is(true));
+        assertTrue(filter.match(this.context, fileWithName("~file.tmp")));
+        assertTrue(filter.match(this.context, fileWithName("~file.bak")));
+        assertFalse(filter.match(this.context, fileWithName("file.tmp")));
+        assertFalse(filter.match(this.context, fileWithName("~file.dat")));
+        assertTrue(filter.match(this.context, fileWithName("~xxkeepxx.bak")));
     }
 
     @Test
     public void testPaths() {
         ResourceFilter filter = FilterOn.paths();
-        assertThat(filter.match(this.context, folderWithPath("/dojo/folder/tests/file.js")), is(true));
-        assertThat(filter.match(this.context, folderWithPath("/dojo/some/folder/tests/file.js")), is(true));
-        assertThat(filter.match(this.context, folderWithPath("/dojo/some/folder/tests/another/file.js")), is(true));
+        assertTrue(filter.match(this.context, folderWithPath("/dojo/folder/tests/file.js")));
+        assertTrue(filter.match(this.context, folderWithPath("/dojo/some/folder/tests/file.js")));
+        assertTrue(filter.match(this.context, folderWithPath("/dojo/some/folder/tests/another/file.js")));
     }
 
     @Test
     public void testPaths1() {
         ResourceFilter filter = FilterOn.paths(PathStyle.FULL);
-        assertThat(filter.match(this.context, folderWithPath("/dojo/folder/tests/file.js")), is(true));
-        assertThat(filter.match(this.context, folderWithPath("/dojo/some/folder/tests/file.js")), is(true));
-        assertThat(filter.match(this.context, folderWithPath("/dojo/some/folder/tests/another/file.js")), is(true));
+        assertTrue(filter.match(this.context, folderWithPath("/dojo/folder/tests/file.js")));
+        assertTrue(filter.match(this.context, folderWithPath("/dojo/some/folder/tests/file.js")));
+        assertTrue(filter.match(this.context, folderWithPath("/dojo/some/folder/tests/another/file.js")));
 
     }
 
     @Test
     public void testPaths2() {
         ResourceFilter filter = FilterOn.caseSensitivePaths(PathStyle.FULL);
-        assertThat(filter.match(this.context, folderWithPath("/dojo/folder/tests/file.js")), is(true));
-        assertThat(filter.match(this.context, folderWithPath("/dojo/some/folder/tests/file.js")), is(true));
-        assertThat(filter.match(this.context, folderWithPath("/dojo/some/folder/tests/another/file.js")), is(true));
+        assertTrue(filter.match(this.context, folderWithPath("/dojo/folder/tests/file.js")));
+        assertTrue(filter.match(this.context, folderWithPath("/dojo/some/folder/tests/file.js")));
+        assertTrue(filter.match(this.context, folderWithPath("/dojo/some/folder/tests/another/file.js")));
 
     }
 
     @Test
     public void testPaths3() {
         ResourceFilter filter = FilterOn.caseSensitivePaths();
-        assertThat(filter.match(this.context, folderWithPath("/dojo/folder/tests/file.js")), is(true));
-        assertThat(filter.match(this.context, folderWithPath("/dojo/some/folder/tests/file.js")), is(true));
-        assertThat(filter.match(this.context, folderWithPath("/dojo/some/folder/tests/another/file.js")), is(true));
+        assertTrue(filter.match(this.context, folderWithPath("/dojo/folder/tests/file.js")));
+        assertTrue(filter.match(this.context, folderWithPath("/dojo/some/folder/tests/file.js")));
+        assertTrue(filter.match(this.context, folderWithPath("/dojo/some/folder/tests/another/file.js")));
 
     }
 
     @Test
     public void testCaseInSensitiveNames() {
         ResourceFilter filter = FilterOn.names().matching("file.tmp");
-        assertThat(filter.match(this.context, fileWithName("FiLe.tmp")), is(true));
-        assertThat(filter.match(this.context, fileWithName("~file.bak")), is(false));
-        assertThat(filter.match(this.context, fileWithName("file.tmp")), is(true));
-        assertThat(filter.match(this.context, fileWithName("~file.dat")), is(false));
+        assertTrue(filter.match(this.context, fileWithName("FiLe.tmp")));
+        assertFalse(filter.match(this.context, fileWithName("~file.bak")));
+        assertTrue(filter.match(this.context, fileWithName("file.tmp")));
+        assertFalse(filter.match(this.context, fileWithName("~file.dat")));
     }
 
     private File fileWithName(String name) {

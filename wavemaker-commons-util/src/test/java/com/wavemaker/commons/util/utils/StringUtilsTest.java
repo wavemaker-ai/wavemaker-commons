@@ -21,13 +21,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.wavemaker.commons.util.StringUtils;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Simon Toens
@@ -132,20 +132,20 @@ public class StringUtilsTest {
 
     @Test
     public void testHasUpperCase() {
-        Assert.assertTrue(StringUtils.hasUpperCase("Abc"));
-        Assert.assertFalse(StringUtils.hasUpperCase("abc"));
+        Assertions.assertTrue(StringUtils.hasUpperCase("Abc"));
+        Assertions.assertFalse(StringUtils.hasUpperCase("abc"));
     }
 
     @Test
     public void testIsJavaKeyWord() {
-        Assert.assertTrue(StringUtils.isJavaKeyword("Switch"));
+        Assertions.assertTrue(StringUtils.isJavaKeyword("Switch"));
     }
 
     @Test
     public void testGetItemsStartingWIth() {
         List<String> finalItems = StringUtils.getItemsStartingWith(Arrays.asList("sampleA", "sampleB", "sampleC"), "sample", true);
         String[] expectedList = {"A", "B", "C"};
-        Assert.assertEquals(expectedList, finalItems.toArray());
+        Assertions.assertArrayEquals(expectedList, finalItems.toArray());
     }
 
     @Test
@@ -153,20 +153,20 @@ public class StringUtilsTest {
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
         String expectedDate = dateFormat.format(new Date());
         String actualDate = StringUtils.getFormattedDate();
-        Assert.assertEquals(actualDate, expectedDate);
+        Assertions.assertEquals(expectedDate, actualDate);
 
     }
 
     @Test
     public void testThrowableString() {
-        Assert.assertTrue(StringUtils.toString(new RuntimeException("sample Exception")).contains("java.lang.RuntimeException: sample Exception"));
+        Assertions.assertTrue(StringUtils.toString(new RuntimeException("sample Exception")).contains("java.lang.RuntimeException: sample Exception"));
     }
 
     @Test
     public void testGetUniqueNames() {
-        Assert.assertEquals(StringUtils.getUniqueName("abc", Arrays.asList("abc", "bcd", "abc2")), "abc3");
-        Assert.assertEquals(StringUtils.getUniqueName("abc", Arrays.asList("bcd", "cde")), "abc");
-        Assert.assertEquals(StringUtils.getUniqueName("abc", "abc"), "abc2");
+        Assertions.assertEquals("abc3", StringUtils.getUniqueName("abc", Arrays.asList("abc", "bcd", "abc2")));
+        Assertions.assertEquals("abc", StringUtils.getUniqueName("abc", Arrays.asList("bcd", "cde")));
+        Assertions.assertEquals("abc2", StringUtils.getUniqueName("abc", "abc"));
     }
 
 }

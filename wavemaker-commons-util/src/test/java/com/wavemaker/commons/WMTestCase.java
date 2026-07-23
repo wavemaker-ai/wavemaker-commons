@@ -15,6 +15,7 @@
 package com.wavemaker.commons;
 
 import java.io.File;
+import org.junit.jupiter.api.Assertions;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,12 +23,11 @@ import java.util.logging.Logger;
 import com.wavemaker.commons.util.WMFileUtils;
 import com.wavemaker.commons.util.WMIOUtils;
 
-import junit.framework.TestCase;
 
 /**
  * @author Simon Toens
  */
-public abstract class WMTestCase extends TestCase {
+public abstract class WMTestCase {
 
     private static final Level DEFAULT_LEVEL = Level.INFO;
 
@@ -38,21 +38,6 @@ public abstract class WMTestCase extends TestCase {
     }
 
     protected WMTestCase() {
-        super();
-    }
-
-    protected WMTestCase(String methodName) {
-        super(methodName);
-    }
-
-    protected WMTestCase(String methodName, Level logLevel) {
-        super(methodName);
-        logger.setLevel(logLevel);
-    }
-
-    protected WMTestCase(Level logLevel) {
-        super();
-        logger.setLevel(logLevel);
     }
 
     protected void info(Object o) {
@@ -71,24 +56,10 @@ public abstract class WMTestCase extends TestCase {
         }
     }
 
-    /**
-     * Compare the contents of two files; display the message.
-     *
-     * @param expected The File containing the expected contents.
-     * @param actual   The File containing the resulting contents.
-     */
     public static void assertEquals(File expected, File actual) throws IOException {
-
         assertEquals(null, expected, actual);
     }
 
-    /**
-     * Compare the contents of two files; display the message.
-     *
-     * @param message  The message to display.
-     * @param expected The File containing the expected contents.
-     * @param actual   The File containing the resulting contents.
-     */
     public static void assertEquals(String message, File expected, File actual) throws IOException {
 
         String msg = "mismatch between expected file \"" + expected + "\" and actual \"" + actual + "\"";
@@ -102,11 +73,11 @@ public abstract class WMTestCase extends TestCase {
             String expectedStr = WMFileUtils.readFileToString(expected);
             String actualStr = WMFileUtils.readFileToString(actual);
 
-            assertEquals(msg, expectedStr, actualStr);
+            Assertions.assertEquals(expectedStr, actualStr, msg);
         } else if (expected.isDirectory() && actual.isDirectory()) {
-            assertEquals(msg, expected.getAbsolutePath(), actual.getAbsolutePath());
+            Assertions.assertEquals(expected.getAbsolutePath(), actual.getAbsolutePath(), msg);
         } else {
-            fail(msg);
+            Assertions.fail(msg);
         }
     }
 }

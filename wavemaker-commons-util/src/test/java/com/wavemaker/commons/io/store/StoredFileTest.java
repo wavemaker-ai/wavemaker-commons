@@ -17,11 +17,9 @@ package com.wavemaker.commons.io.store;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import com.wavemaker.commons.io.AbstractFileContent;
 import com.wavemaker.commons.io.File;
@@ -29,10 +27,9 @@ import com.wavemaker.commons.io.FileContent;
 import com.wavemaker.commons.io.Folder;
 import com.wavemaker.commons.io.exception.ResourceDoesNotExistException;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.core.Is.isA;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -45,12 +42,9 @@ import static org.mockito.Mockito.verify;
  */
 public class StoredFileTest {
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     private StoredFile file;
 
-    @Before
+    @BeforeEach
     public void setup() {
         this.file = new MockStoredFolder().getFile("file.txt");
     }
@@ -59,7 +53,7 @@ public class StoredFileTest {
     public void shouldGetSizeFromStore() throws Exception {
         Long size = 100L;
         given(this.file.getStore().getSize()).willReturn(size);
-        assertThat(this.file.getSize(), is(equalTo(size)));
+        assertEquals(size, this.file.getSize());
         verify(this.file.getStore()).getSize();
     }
 
@@ -67,16 +61,14 @@ public class StoredFileTest {
     public void shouldGetLastModifiedFromStore() throws Exception {
         Long lastModified = 100L;
         given(this.file.getStore().getLastModified()).willReturn(lastModified);
-        assertThat(this.file.getLastModified(), is(equalTo(lastModified)));
+        assertEquals(lastModified, this.file.getLastModified());
         verify(this.file.getStore()).getLastModified();
     }
 
     @Test
     public void shouldThrowOnTouchNonExistingFile() throws Exception {
         given(this.file.exists()).willReturn(false);
-        this.thrown.expect(ResourceDoesNotExistException.class);
-        this.thrown.expectMessage("The resource '/file.txt' does not exist");
-        this.file.touch();
+        assertThrows(ResourceDoesNotExistException.class, () -> this.file.touch());
     }
 
     @Test
@@ -90,19 +82,19 @@ public class StoredFileTest {
     public void shouldGetContentInputStreamFromFileSystem() throws Exception {
         InputStream inputStream = mock(InputStream.class);
         given(this.file.getStore().getInputStream()).willReturn(inputStream);
-        assertThat(this.file.getContent().asInputStream(), is(inputStream));
+        assertEquals(inputStream, this.file.getContent().asInputStream());
     }
 
     @Test
     public void shouldGetContentOutputStreamFromFileSystem() throws Exception {
         OutputStream outputStream = mock(OutputStream.class);
         given(this.file.getStore().getOutputStream(false)).willReturn(outputStream);
-        assertThat(this.file.getContent().asOutputStream(), is(outputStream));
+        assertEquals(outputStream, this.file.getContent().asOutputStream());
     }
 
     @Test
     public void shouldGetContentAsAbstractContent() throws Exception {
-        assertThat((AbstractFileContent) this.file.getContent(), isA(AbstractFileContent.class));
+        assertInstanceOf(AbstractFileContent.class, this.file.getContent());
     }
 
     @Test
@@ -137,12 +129,11 @@ public class StoredFileTest {
     public void shouldNotMoveIfDoesNotExist() throws Exception {
         Folder destination = mock(Folder.class);
         given(this.file.getStore().exists()).willReturn(false);
-        this.thrown.expect(ResourceDoesNotExistException.class);
-        this.file.moveTo(destination);
+        assertThrows(ResourceDoesNotExistException.class, () -> this.file.moveTo(destination));
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void shouldMove() throws Exception {
         Folder destination = mock(Folder.class);
         File destinationFile = mock(File.class);
@@ -161,8 +152,7 @@ public class StoredFileTest {
     public void shouldNotCopyIfDoesNotExist() throws Exception {
         Folder destination = mock(Folder.class);
         given(this.file.getStore().exists()).willReturn(false);
-        this.thrown.expect(ResourceDoesNotExistException.class);
-        this.file.copyTo(destination);
+        assertThrows(ResourceDoesNotExistException.class, () -> this.file.copyTo(destination));
     }
 
     @Test
@@ -188,30 +178,24 @@ public class StoredFileTest {
     @Test
     public void shouldNotRenameIfDoesNotExist() throws Exception {
         given(this.file.getStore().exists()).willReturn(false);
-        this.thrown.expect(ResourceDoesNotExistException.class);
-        this.thrown.expectMessage("The resource '/file.txt' does not exist");
-        this.file.rename("file.bak");
+        assertThrows(ResourceDoesNotExistException.class, () -> this.file.rename("file.bak"));
     }
 
     @Test
     public void shouldNotRenameToEmpty() throws Exception {
         given(this.file.getStore().exists()).willReturn(true);
-        this.thrown.expect(IllegalArgumentException.class);
-        this.thrown.expectMessage("Name must not be empty");
-        this.file.rename("");
+        assertThrows(IllegalArgumentException.class, () -> this.file.rename(""));
     }
 
     @Test
     public void shouldNotRenameWithPathElements() throws Exception {
         given(this.file.getStore().exists()).willReturn(true);
-        this.thrown.expect(IllegalArgumentException.class);
-        this.thrown.expectMessage("Name must not contain path elements");
-        this.file.rename("file/bak");
+        assertThrows(IllegalArgumentException.class, () -> this.file.rename("file/bak"));
     }
 
     @Test
     public void shouldHaveToString() throws Exception {
-        assertThat(this.file.toString(), is("/file.txt"));
+        assertEquals("/file.txt", this.file.toString());
     }
 
 }

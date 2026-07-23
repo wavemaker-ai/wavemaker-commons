@@ -20,14 +20,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import com.wavemaker.commons.util.CastUtils;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Created by Prithvi Medavaram on 13/10/15.
@@ -63,7 +64,7 @@ public class CastUtilsTest {
         assertEquals(castedSet, unknownTypesSet);
     }
 
-    @Test(expectedExceptions = {ClassCastException.class})
+    @Test
     public void castListClassCastExceptionTest() {
         List<String> stringList = new ArrayList<>();
         stringList.add("a");
@@ -71,12 +72,14 @@ public class CastUtilsTest {
         stringList.add("c");
 
         List unknownTypesList = stringList;
-        List<Integer> castedList = CastUtils.cast(unknownTypesList);
-        for (Integer i : castedList) {// this line should throw ClassCastException as we cannot iterate over integers in a string list
-        }
+        assertThrows(ClassCastException.class, () -> {
+            List<Integer> castedList = CastUtils.cast(unknownTypesList);
+            for (Integer i : castedList) {// this line should throw ClassCastException as we cannot iterate over integers in a string list
+            }
+        });
     }
 
-    @Test(expectedExceptions = {ClassCastException.class})
+    @Test
     public void castSetClassCastExceptionTest() {
         Set<String> stringSet = new HashSet<>();
         stringSet.add("a");
@@ -84,9 +87,11 @@ public class CastUtilsTest {
         stringSet.add("c");
 
         Set unknownTypesList = stringSet;
-        Set<Integer> castedSet = CastUtils.cast(unknownTypesList);
-        for (Integer i : castedSet) {// this line should throw ClassCastException as we cannot iterate over integers in a string set
-        }
+        assertThrows(ClassCastException.class, () -> {
+            Set<Integer> castedSet = CastUtils.cast(unknownTypesList);
+            for (Integer i : castedSet) {// this line should throw ClassCastException as we cannot iterate over integers in a string set
+            }
+        });
     }
 
     @Test

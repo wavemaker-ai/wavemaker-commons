@@ -25,14 +25,15 @@ import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXException;
 
 import com.wavemaker.commons.util.JAXBUtils;
 import com.wavemaker.commons.util.XMLWriter;
 import com.wavemaker.commons.util.XmlDocument;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Created by anitha on 19/10/15.
@@ -70,21 +71,19 @@ public class XMLWriterTest {
 
     }
 
-    @Test(expectedExceptions = {RuntimeException.class})
+    @Test
     public void XmlWriterTestExceptionCase() throws Exception {
         File temp = File.createTempFile("Sampletemp", ".xml");
         PrintWriter pw = new PrintWriter(temp);
-        XMLWriter xw = null;
-        try {
-            xw = new XMLWriter(pw);
+        XMLWriter xw = new XMLWriter(pw);
+        assertThrows(RuntimeException.class, () -> {
             xw.addVersion();
             xw.addDoctype("Test", "SYSTEM", "file:///tmp/");
             xw.addElement("Employee");
             xw.addAttribute("Name", "chris");
             xw.addVersion();// This line should throw exception
-        } finally {
-            xw.finish();
-        }
+        });
+        xw.finish();
     }
 
     @Test

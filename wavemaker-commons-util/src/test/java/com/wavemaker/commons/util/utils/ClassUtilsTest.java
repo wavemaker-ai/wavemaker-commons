@@ -14,15 +14,17 @@
  ******************************************************************************/
 package com.wavemaker.commons.util.utils;
 
-import java.lang.reflect.Method;
+import java.util.stream.Stream;
 
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import com.wavemaker.commons.util.ClassUtils;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Matt Small
@@ -36,55 +38,54 @@ public class ClassUtilsTest {
         Class<?> clazz = ClassUtilsTest.class;
         Object returned = ClassUtils.newInstance(clazz);
         assertTrue(returned instanceof ClassUtilsTest);
-        assertEquals(((ClassUtilsTest) returned).testField, 10);
-
+        assertEquals(10, ((ClassUtilsTest) returned).testField);
     }
 
-    @Test(dataProvider = "propertyData")
+    static Stream<Arguments> getterNames() {
+        return Stream.of(
+            Arguments.of("User", "getUser"),
+            Arguments.of("U", "getU"),
+            Arguments.of("u", "getU"),
+            Arguments.of("username", "getUsername"),
+            Arguments.of("userName", "getUserName")
+        );
+    }
+
+    static Stream<Arguments> altGetterNames() {
+        return Stream.of(
+            Arguments.of("User", "isUser"),
+            Arguments.of("U", "isU"),
+            Arguments.of("u", "isU"),
+            Arguments.of("username", "isUsername"),
+            Arguments.of("userName", "isUserName")
+        );
+    }
+
+    static Stream<Arguments> setterNames() {
+        return Stream.of(
+            Arguments.of("User", "setUser"),
+            Arguments.of("U", "setU"),
+            Arguments.of("u", "setU"),
+            Arguments.of("username", "setUsername"),
+            Arguments.of("userName", "setUserName")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("getterNames")
     public void getPropertyGetterNameTest(String propertyName, String expectedGetterName) {
-        assertEquals(ClassUtils.getPropertyGetterName(propertyName), expectedGetterName);
+        assertEquals(expectedGetterName, ClassUtils.getPropertyGetterName(propertyName));
     }
 
-    @Test(dataProvider = "propertyData")
+    @ParameterizedTest
+    @MethodSource("altGetterNames")
     public void getAltPropertyGetterNameTest(String propertyName, String expectedAltPropertyGetterName) {
-        assertEquals(ClassUtils.getAltPropertyGetterName(propertyName), expectedAltPropertyGetterName);
+        assertEquals(expectedAltPropertyGetterName, ClassUtils.getAltPropertyGetterName(propertyName));
     }
 
-    @Test(dataProvider = "propertyData")
+    @ParameterizedTest
+    @MethodSource("setterNames")
     public void getPropertySetterNameTest(String propertyName, String expectedSetterName) {
-        assertEquals(ClassUtils.getPropertySetterName(propertyName), expectedSetterName);
-    }
-
-    @DataProvider
-    public Object[][] propertyData(Method name) {
-
-        Object[][] obj = new Object[5][2];
-        obj[0][0] = "User";
-        obj[1][0] = "U";
-        obj[2][0] = "u";
-        obj[3][0] = "username";
-        obj[4][0] = "userName";
-        if (name.getName().equalsIgnoreCase("getPropertyGetterNameTest")) {
-            obj[0][1] = "getUser";
-            obj[1][1] = "getU";
-            obj[2][1] = "getU";
-            obj[3][1] = "getUsername";
-            obj[4][1] = "getUserName";
-        }
-        if (name.getName().equalsIgnoreCase("getAltPropertyGetterNameTest")) {
-            obj[0][1] = "isUser";
-            obj[1][1] = "isU";
-            obj[2][1] = "isU";
-            obj[3][1] = "isUsername";
-            obj[4][1] = "isUserName";
-        }
-        if (name.getName().equalsIgnoreCase("getPropertySetterNameTest")) {
-            obj[0][1] = "setUser";
-            obj[1][1] = "setU";
-            obj[2][1] = "setU";
-            obj[3][1] = "setUsername";
-            obj[4][1] = "setUserName";
-        }
-        return obj;
+        assertEquals(expectedSetterName, ClassUtils.getPropertySetterName(propertyName));
     }
 }

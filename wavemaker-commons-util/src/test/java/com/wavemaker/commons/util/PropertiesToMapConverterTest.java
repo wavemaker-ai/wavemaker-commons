@@ -18,8 +18,8 @@ package com.wavemaker.commons.util;
 import java.util.Map;
 import java.util.Properties;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class PropertiesToMapConverterTest {
     @Test
@@ -30,12 +30,12 @@ public class PropertiesToMapConverterTest {
         properties.put("a.b.e", "3");
 
         Map<String, Object> map = PropertiesToMapConverter.propertiesToMapConverter(properties);
-        Assert.assertEquals(1, map.size());
+        Assertions.assertEquals(1, map.size());
         Map aMap = (Map) map.get("a");
-        Assert.assertEquals(1, aMap.size());
+        Assertions.assertEquals(1, aMap.size());
         Map bMap = (Map) aMap.get("b");
-        Assert.assertEquals(3, bMap.size());
-        Assert.assertEquals("3", bMap.get("e"));
+        Assertions.assertEquals(3, bMap.size());
+        Assertions.assertEquals("3", bMap.get("e"));
     }
 
     @Test
@@ -46,12 +46,12 @@ public class PropertiesToMapConverterTest {
         properties.put("security.general.csp.enabled", "false");
 
         Map<String, Object> map = PropertiesToMapConverter.propertiesToMapConverter(properties);
-        Assert.assertEquals(1, map.size());
+        Assertions.assertEquals(1, map.size());
         Map securityMap = (Map) map.get("security");
-        Assert.assertEquals(1, securityMap.size());
+        Assertions.assertEquals(1, securityMap.size());
         Map generalMap = (Map) securityMap.get("general");
-        Assert.assertEquals(2, generalMap.size());
+        Assertions.assertEquals(2, generalMap.size());
         Map sslMap = (Map) generalMap.get("ssl");
-        Assert.assertEquals(2, sslMap.size());
+        Assertions.assertEquals(2, sslMap.size());
     }
 }

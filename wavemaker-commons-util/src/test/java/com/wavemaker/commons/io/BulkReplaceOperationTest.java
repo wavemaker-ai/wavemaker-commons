@@ -17,10 +17,10 @@ package com.wavemaker.commons.io;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.testng.Assert;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.wavemaker.commons.util.WMIOUtils;
 
@@ -30,7 +30,7 @@ public class BulkReplaceOperationTest {
     private static String toString = "this content has  been modified";
     private File tempFile;
 
-    @BeforeTest
+    @BeforeEach
     public void beforeTest() {
         tempFile = WMIOUtils.createTempFile("test", ".txt");
         tempFile.getContent().write(fromString);
@@ -47,10 +47,10 @@ public class BulkReplaceOperationTest {
 
         bulkReplaceOperation.addAll(testMap);
         bulkReplaceOperation.perform(tempFile);
-        Assert.assertEquals(tempFile.getContent().asString(), toString);
+        Assertions.assertEquals(tempFile.getContent().asString(), toString);
     }
 
-    @AfterTest
+    @AfterEach
     public void afterTest() {
         tempFile.delete();
     }

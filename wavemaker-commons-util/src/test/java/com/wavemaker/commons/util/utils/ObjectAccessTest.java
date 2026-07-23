@@ -18,15 +18,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.wavemaker.commons.util.ObjectAccess;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Created by Prithvi Medavaram on 13/10/15.
@@ -126,27 +126,27 @@ public class ObjectAccessTest {
     @Test
     public void testGenericReturntypes() {
         Class[] expectedClasses = {Car.class};
-        Assert.assertEquals(ObjectAccess.getInstance().getGenericReturnTypes(Task.class, "getTasks", 0).toArray(),
-            expectedClasses);
+        Assertions.assertArrayEquals(expectedClasses,
+            ObjectAccess.getInstance().getGenericReturnTypes(Task.class, "getTasks", 0).toArray());
 
     }
 
     @Test
     public void testGetMethodReturnType() {
-        Assert.assertEquals(ObjectAccess.getInstance().getMethodReturnType(List.class, "size", 0),
+        Assertions.assertEquals(ObjectAccess.getInstance().getMethodReturnType(List.class, "size", 0),
             int.class);
     }
 
     @Test
     public void testGetParameterTypes() {
-        Assert.assertEquals(ObjectAccess.getInstance().getMethodParamTypes(Task.class, "setTasks", 1).toArray()[0],
+        Assertions.assertEquals(ObjectAccess.getInstance().getMethodParamTypes(Task.class, "setTasks", 1).toArray()[0],
             List.class);
     }
 
     @Test
     public void testHasAnnotation() {
-        Assert.assertTrue(ObjectAccess.getInstance().hasAnnotation(MyAnnotation.class, new Task(), "getTasks"));
-        Assert.assertFalse(ObjectAccess.getInstance().hasAnnotation(MyAnnotation.class, new Task(), "tasks"));
+        Assertions.assertTrue(ObjectAccess.getInstance().hasAnnotation(MyAnnotation.class, new Task(), "getTasks"));
+        Assertions.assertFalse(ObjectAccess.getInstance().hasAnnotation(MyAnnotation.class, new Task(), "tasks"));
     }
 
 }

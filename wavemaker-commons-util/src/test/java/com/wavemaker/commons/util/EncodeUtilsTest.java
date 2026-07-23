@@ -14,40 +14,36 @@
  ******************************************************************************/
 package com.wavemaker.commons.util;
 
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-@RunWith(Parameterized.class)
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class EncodeUtilsTest {
 
-    private String actualString;
-    private String encodedString;
-
-    public EncodeUtilsTest(String actualString, String encodedString) {
-        this.actualString = actualString;
-        this.encodedString = encodedString;
+    static Stream<Arguments> testData() {
+        return Stream.of(
+            Arguments.of("company name", "company+name"),
+            Arguments.of("a+b", "a%2Bb"),
+            Arguments.of("a%ddf", "a%25ddf"),
+            Arguments.of("as%2Csdxfcv", "as%252Csdxfcv"),
+            Arguments.of("this is 'random',\\\"text\\\"2Check(encoding&{decoding})",
+                "this+is+%27random%27%2C%5C%22text%5C%222Check%28encoding%26%7Bdecoding%7D%29")
+        );
     }
 
-    @Parameterized.Parameters()
-    public static Collection<Object[]> testData() {
-        return Arrays.asList(new Object[][]{
-            {"company name", "company+name"}, {"a+b", "a%2Bb"}, {"a%ddf", "a%25ddf"}, {"as%2Csdxfcv", "as%252Csdxfcv"},
-            {"this is 'random',\\\"text\\\"2Check(encoding&{decoding})", "this+is+%27random%27%2C%5C%22text%5C%222Check%28encoding%26%7Bdecoding%7D%29"}
-        });
+    @ParameterizedTest
+    @MethodSource("testData")
+    public void encode(String actualString, String encodedString) {
+        assertEquals(encodedString, EncodeUtils.encode(actualString));
     }
 
-    @Test
-    public void encode() {
-        Assert.assertEquals(encodedString, EncodeUtils.encode(actualString));
-    }
-
-    @Test
-    public void decode() {
-        Assert.assertEquals(actualString, EncodeUtils.decode(encodedString));
+    @ParameterizedTest
+    @MethodSource("testData")
+    public void decode(String actualString, String encodedString) {
+        assertEquals(actualString, EncodeUtils.decode(encodedString));
     }
 }

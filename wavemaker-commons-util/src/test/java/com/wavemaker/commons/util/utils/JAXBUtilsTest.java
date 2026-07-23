@@ -24,14 +24,14 @@ import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXException;
 
 import com.wavemaker.commons.util.JAXBUtils;
 import com.wavemaker.commons.util.WMIOUtils;
 import com.wavemaker.commons.util.XmlDocument;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Created by Prithvi Medavaram on 13/10/15.
@@ -80,9 +80,9 @@ public class JAXBUtilsTest {
         XmlDocument<Customer> xmlDocument = JAXBUtils.unMarshall(getJaxbContext(), is);
         Customer actualCustomer = xmlDocument.getObject();
 
-        assertEquals(actualCustomer.getAge(), customer.getAge());
-        assertEquals(actualCustomer.getName(), customer.getName());
-        assertEquals(actualCustomer.getId(), 0);
+        assertEquals(customer.getAge(), actualCustomer.getAge());
+        assertEquals(customer.getName(), actualCustomer.getName());
+        assertEquals(0, actualCustomer.getId());
 
     }
 }

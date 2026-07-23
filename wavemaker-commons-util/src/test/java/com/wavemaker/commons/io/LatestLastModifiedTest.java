@@ -14,10 +14,10 @@
  ******************************************************************************/
 package com.wavemaker.commons.io;
 
-import org.testng.Assert;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.wavemaker.commons.util.WMIOUtils;
 
@@ -26,7 +26,7 @@ public class LatestLastModifiedTest {
     private LatestLastModified latestLastModified;
     private File file;
 
-    @BeforeTest
+    @BeforeEach
     public void beforeTest() {
         file = WMIOUtils.createTempFile("temp", ".txt");
         latestLastModified = new LatestLastModified();
@@ -35,10 +35,10 @@ public class LatestLastModifiedTest {
     @Test
     public void testPerform() {
         latestLastModified.perform(file);
-        Assert.assertNotEquals(latestLastModified.getValue(), 0);
+        Assertions.assertNotEquals(latestLastModified.getValue(), 0);
     }
 
-    @AfterTest
+    @AfterEach
     public void afterTest() {
         file.delete();
     }

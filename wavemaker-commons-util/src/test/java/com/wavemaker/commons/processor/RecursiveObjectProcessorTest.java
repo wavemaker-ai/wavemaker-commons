@@ -19,9 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class RecursiveObjectProcessorTest {
     private static final int PROCESSED_INT = 100;
@@ -29,7 +29,7 @@ public class RecursiveObjectProcessorTest {
 
     private RecursiveObjectProcessor recursiveObjectProcessor;
 
-    @BeforeMethod
+    @BeforeEach
     public void init() {
         TestObjectProcessor testObjectProcessor = new TestObjectProcessor();
         ProcessContext processContext = new ProcessContext();
@@ -40,31 +40,31 @@ public class RecursiveObjectProcessorTest {
     @Test
     public void testString() {
         Object processedString = recursiveObjectProcessor.processRootObject("string");
-        Assert.assertEquals(processedString, PROCESSED_STRING);
+        Assertions.assertEquals(processedString, PROCESSED_STRING);
     }
 
     @Test
     public void testList() {
         Object processedList = recursiveObjectProcessor.processRootObject(List.of("string1", "string2"));
-        Assert.assertEquals(processedList, List.of(PROCESSED_STRING, PROCESSED_STRING));
+        Assertions.assertEquals(processedList, List.of(PROCESSED_STRING, PROCESSED_STRING));
     }
 
     @Test
     public void testMap() {
         Object processedMap = recursiveObjectProcessor.processRootObject(Map.of("k1", "v1"));
-        Assert.assertEquals(processedMap, Map.of(PROCESSED_STRING, PROCESSED_STRING));
+        Assertions.assertEquals(processedMap, Map.of(PROCESSED_STRING, PROCESSED_STRING));
     }
 
     @Test
     public void testSet() {
         Object processedSet = recursiveObjectProcessor.processRootObject(Set.of("string1"));
-        Assert.assertEquals(processedSet, Set.of(PROCESSED_STRING));
+        Assertions.assertEquals(processedSet, Set.of(PROCESSED_STRING));
     }
 
     @Test
     public void testArray() {
         Object processedArray = recursiveObjectProcessor.processRootObject(new String[]{"string1", "string2"});
-        Assert.assertEquals(processedArray, new String[]{PROCESSED_STRING, PROCESSED_STRING});
+        Assertions.assertArrayEquals(new String[]{PROCESSED_STRING, PROCESSED_STRING}, (String[]) processedArray);
     }
 
     @Test
@@ -72,7 +72,7 @@ public class RecursiveObjectProcessorTest {
         PrimitivePojo primitivePojo = new PrimitivePojo(1, 1, "data");
         PrimitivePojo expectedPrimitivePojo = new PrimitivePojo(PROCESSED_INT, PROCESSED_INT, PROCESSED_STRING);
         Object processedPrimitivePojo = recursiveObjectProcessor.processRootObject(primitivePojo);
-        Assert.assertEquals(processedPrimitivePojo, expectedPrimitivePojo);
+        Assertions.assertEquals(processedPrimitivePojo, expectedPrimitivePojo);
     }
 
     @Test
@@ -84,7 +84,7 @@ public class RecursiveObjectProcessorTest {
         Object processedListPojo = recursiveObjectProcessor.processRootObject(listPojo);
         ListPojo expectedListPojo = new ListPojo(List.of(PROCESSED_STRING, PROCESSED_STRING), List.of(List.of(PROCESSED_STRING, PROCESSED_STRING),
             List.of(PROCESSED_STRING, PROCESSED_STRING)), List.of(new PrimitivePojo(PROCESSED_INT, PROCESSED_INT, PROCESSED_STRING)));
-        Assert.assertEquals(processedListPojo, expectedListPojo);
+        Assertions.assertEquals(processedListPojo, expectedListPojo);
     }
 
     @Test
@@ -98,7 +98,7 @@ public class RecursiveObjectProcessorTest {
         MapPojo expectedMapPojo = new MapPojo(Map.of(PROCESSED_STRING, PROCESSED_STRING), Map.of(PROCESSED_STRING,
             Map.of(PROCESSED_STRING, PROCESSED_STRING)), Map.of(new PrimitivePojo(PROCESSED_INT, PROCESSED_INT, PROCESSED_STRING),
             new PrimitivePojo(PROCESSED_INT, PROCESSED_INT, PROCESSED_STRING)));
-        Assert.assertEquals(processedMapPojo, expectedMapPojo);
+        Assertions.assertEquals(processedMapPojo, expectedMapPojo);
     }
 
     @Test
@@ -108,7 +108,7 @@ public class RecursiveObjectProcessorTest {
         SetPojo setPojo = new SetPojo(stringSet, nestedStringSet);
         Object processedSetPojo = recursiveObjectProcessor.processRootObject(setPojo);
         SetPojo expectedSetPojo = new SetPojo(Set.of(PROCESSED_STRING), Set.of(Set.of(PROCESSED_STRING)));
-        Assert.assertEquals(processedSetPojo, expectedSetPojo);
+        Assertions.assertEquals(processedSetPojo, expectedSetPojo);
     }
 
     @Test
@@ -118,6 +118,6 @@ public class RecursiveObjectProcessorTest {
         Object processedArrayPojo = recursiveObjectProcessor.processRootObject(arrayPojo);
         ArrayPojo expectedArrayPojo = new ArrayPojo(new int[]{PROCESSED_INT, PROCESSED_INT}, new Integer[]{PROCESSED_INT, PROCESSED_INT},
             new String[]{PROCESSED_STRING, PROCESSED_STRING}, new PrimitivePojo[]{new PrimitivePojo(PROCESSED_INT, PROCESSED_INT, PROCESSED_STRING)});
-        Assert.assertEquals(processedArrayPojo, expectedArrayPojo);
+        Assertions.assertEquals(processedArrayPojo, expectedArrayPojo);
     }
 }

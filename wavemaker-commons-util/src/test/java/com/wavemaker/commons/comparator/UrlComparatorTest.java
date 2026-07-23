@@ -17,11 +17,13 @@ package com.wavemaker.commons.comparator;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * UrlComparator Tester.
@@ -140,26 +142,9 @@ public class UrlComparatorTest {
 
     }
 
-    /**
-     * Method: compare(final T o1, final T o2)
-     */
-    @Test(dataProvider = "listProvider")
-    public void testCompare(List list1, List list2) throws Exception {
-        list1.sort(stringUrlComparator);
-        list1.sort(stringPatternComparator);
-        assertEquals(this.list1, list1);
-
-        list2.sort(stringUrlComparator);
-        list2.sort(stringPatternComparator);
-        assertEquals(this.list2, list2);
-    }
-
-    @DataProvider
-    public Object[][] listProvider() {
-        Object[][] object = new Object[1][2];
+    static Stream<Arguments> listProvider() {
         List<String> list1 = new ArrayList<>();
         list1.add("/test/**");
-
         list1.add("/**");
         list1.add("/services/hrdb/User/getEmployee");
         list1.add("/pages/Main/**");
@@ -171,10 +156,8 @@ public class UrlComparatorTest {
         list1.add("/services/hrdb/queryExecutor/**");
         list1.add("/services/security/**");
         list1.add("/services/hrdb/User/");
-        object[0][0] = list1;
 
         List<String> list2 = new ArrayList<>();
-
         list2.add("/app.variables.json");
         list2.add("/index.html");
         list2.add("/j_spring_security_check");
@@ -250,8 +233,22 @@ public class UrlComparatorTest {
         list2.add("/services/rfxdb/Types/");
         list2.add("/services/security/**");
 
-        object[0][1] = list2;
-        return object;
+        return Stream.of(Arguments.of(list1, list2));
+    }
+
+    /**
+     * Method: compare(final T o1, final T o2)
+     */
+    @ParameterizedTest
+    @MethodSource("listProvider")
+    public void testCompare(List list1, List list2) throws Exception {
+        list1.sort(stringUrlComparator);
+        list1.sort(stringPatternComparator);
+        assertEquals(this.list1, list1);
+
+        list2.sort(stringUrlComparator);
+        list2.sort(stringPatternComparator);
+        assertEquals(this.list2, list2);
     }
 
 }

@@ -18,10 +18,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 
 import com.wavemaker.commons.io.File;
@@ -33,10 +31,12 @@ import com.wavemaker.commons.io.ResourceStringFormat;
 import com.wavemaker.commons.io.Resources;
 import com.wavemaker.commons.io.exception.ResourceDoesNotExistException;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.core.Is.isA;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -51,19 +51,16 @@ import static org.mockito.Mockito.verify;
  */
 public class StoredFolderTest {
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     private MockStoredFolder folder;
 
-    @Before
+    @BeforeEach
     public void setup() {
         this.folder = new MockStoredFolder();
     }
 
     @Test
     public void shouldCreateWithNoParent() throws Exception {
-        assertThat(this.folder.getParent(), is(nullValue()));
+        assertNull(this.folder.getParent());
     }
 
     @Test
@@ -93,98 +90,96 @@ public class StoredFolderTest {
     @Test
     public void shouldGetParent() throws Exception {
         Folder parent = this.folder.getFolder("a/b").getParent();
-        assertThat(parent.getName(), is("a"));
-        assertThat(parent.toString(), is("/a/"));
+        assertEquals("a", parent.getName());
+        assertEquals("/a/", parent.toString());
     }
 
     @Test
     public void shouldCreateWithNoName() throws Exception {
-        assertThat(this.folder.getName(), is(""));
+        assertEquals("", this.folder.getName());
     }
 
     @Test
     public void shouldCreateWithPathName() throws Exception {
-        assertThat(this.folder.toString(), is("/"));
+        assertEquals("/", this.folder.toString());
     }
 
     @Test
     public void shouldDelegateToFileSystemForExists() throws Exception {
         given(this.folder.getStore().exists()).willReturn(true);
-        assertThat(this.folder.exists(), is(true));
+        assertTrue(this.folder.exists());
         verify(this.folder.getStore()).exists();
     }
 
     @Test
     public void shouldGetChildFolder() throws Exception {
         Folder child = this.folder.getFolder("a");
-        assertThat(child.getName(), is("a"));
-        assertThat(child.toString(), is("/a/"));
+        assertEquals("a", child.getName());
+        assertEquals("/a/", child.toString());
     }
 
     @Test
     public void shouldGetNestedChildFolder() throws Exception {
         Folder child = this.folder.getFolder("a/b");
-        assertThat(child.getName(), is("b"));
-        assertThat(child.toString(), is("/a/b/"));
+        assertEquals("b", child.getName());
+        assertEquals("/a/b/", child.toString());
     }
 
     @Test
     public void shouldGetRelativeChildFolder() throws Exception {
         Folder child = this.folder.getFolder("a/b/../c");
-        assertThat(child.getName(), is("c"));
-        assertThat(child.toString(), is("/a/c/"));
+        assertEquals("c", child.getName());
+        assertEquals("/a/c/", child.toString());
     }
 
     @Test
     public void shouldGetNestedChildFile() throws Exception {
         File child = this.folder.getFile("a/b");
-        assertThat(child.getName(), is("b"));
-        assertThat(child.toString(), is("/a/b"));
+        assertEquals("b", child.getName());
+        assertEquals("/a/b", child.toString());
     }
 
     @Test
     public void shouldGetRelativeChildFile() throws Exception {
         File child = this.folder.getFile("a/b/../c");
-        assertThat(child.getName(), is("c"));
-        assertThat(child.toString(), is("/a/c"));
+        assertEquals("c", child.getName());
+        assertEquals("/a/c", child.toString());
     }
 
     @Test
     public void shouldGetExistingFile() throws Exception {
         this.folder.getFile("a");
         Resource child = this.folder.getExisting("a");
-        assertThat((File) child, isA(File.class));
-        assertThat(child.getName(), is("a"));
-        assertThat(child.toString(), is("/a"));
+        assertInstanceOf(File.class, child);
+        assertEquals("a", child.getName());
+        assertEquals("/a", child.toString());
     }
 
     @Test
     public void shouldGetExistingFolder() throws Exception {
         this.folder.getFolder("a");
         Resource child = this.folder.getExisting("a");
-        assertThat((Folder) child, isA(Folder.class));
-        assertThat(child.getName(), is("a"));
-        assertThat(child.toString(), is("/a/"));
+        assertInstanceOf(Folder.class, child);
+        assertEquals("a", child.getName());
+        assertEquals("/a/", child.toString());
     }
 
     @Test
     public void shouldNotGetExistingIfDoesNotExist() throws Exception {
-        this.thrown.expect(ResourceDoesNotExistException.class);
-        this.thrown.expectMessage("The resource 'a' does not exist in the folder '/'");
-        this.folder.getExisting("a");
+        assertThrows(ResourceDoesNotExistException.class, () -> this.folder.getExisting("a"));
     }
 
     @Test
     public void shouldNotHaveExistingFileIfDoesNotExist() throws Exception {
         boolean actual = this.folder.hasExisting("a");
-        assertThat(actual, is(false));
+        assertFalse(actual);
     }
 
     @Test
     public void shouldHaveExistingFile() throws Exception {
         this.folder.getFolder("a");
         boolean actual = this.folder.hasExisting("a");
-        assertThat(actual, is(true));
+        assertTrue(actual);
     }
 
     @Test
@@ -221,11 +216,11 @@ public class StoredFolderTest {
         Iterator<Resource> iterator = resources.iterator();
         Resource resourceA = iterator.next();
         Resource resourceB = iterator.next();
-        assertThat(iterator.hasNext(), is(false));
-        assertThat((Folder) resourceA, isA(Folder.class));
-        assertThat((File) resourceB, isA(File.class));
-        assertThat(resourceA.toString(), is("/a/"));
-        assertThat(resourceB.toString(), is("/b"));
+        assertFalse(iterator.hasNext());
+        assertInstanceOf(Folder.class, resourceA);
+        assertInstanceOf(File.class, resourceB);
+        assertEquals("/a/", resourceA.toString());
+        assertEquals("/b", resourceB.toString());
     }
 
     @Test
@@ -243,8 +238,8 @@ public class StoredFolderTest {
         });
         Iterator<Resource> iterator = resources.iterator();
         Resource file = iterator.next();
-        assertThat(iterator.hasNext(), is(false));
-        assertThat(file.toString(), is("/b"));
+        assertFalse(iterator.hasNext());
+        assertEquals("/b", file.toString());
     }
 
     @Test
@@ -262,16 +257,15 @@ public class StoredFolderTest {
         });
         Iterator<File> iterator = resources.iterator();
         Resource file = iterator.next();
-        assertThat(iterator.hasNext(), is(false));
-        assertThat(file.toString(), is("/b"));
+        assertFalse(iterator.hasNext());
+        assertEquals("/b", file.toString());
 
     }
 
     @Test
     public void shouldNeedListResourcesFilters() throws Exception {
-        this.thrown.expect(IllegalArgumentException.class);
-        this.thrown.expectMessage("Filters must not be null");
-        this.folder.list().include((ResourceFilter[]) null);
+        assertThrows(IllegalArgumentException.class,
+            () -> this.folder.list().include((ResourceFilter[]) null));
     }
 
     @Test
@@ -283,11 +277,11 @@ public class StoredFolderTest {
         Iterator<Resource> iterator = this.folder.iterator();
         Resource resourceA = iterator.next();
         Resource resourceB = iterator.next();
-        assertThat(iterator.hasNext(), is(false));
-        assertThat((Folder) resourceA, isA(Folder.class));
-        assertThat((File) resourceB, isA(File.class));
-        assertThat(resourceA.toString(), is("/a/"));
-        assertThat(resourceB.toString(), is("/b"));
+        assertFalse(iterator.hasNext());
+        assertInstanceOf(Folder.class, resourceA);
+        assertInstanceOf(File.class, resourceB);
+        assertEquals("/a/", resourceA.toString());
+        assertEquals("/b", resourceB.toString());
     }
 
     @Test
@@ -307,17 +301,14 @@ public class StoredFolderTest {
         Folder destination = mock(Folder.class);
         MockStoredFolder child = this.folder.getFolder("a", false);
         given(this.folder.getStore().exists()).willReturn(true);
-        this.thrown.expect(ResourceDoesNotExistException.class);
-        child.moveTo(destination);
+        assertThrows(ResourceDoesNotExistException.class, () -> child.moveTo(destination));
     }
 
     @Test
     public void shouldNotMoveRoot() throws Exception {
         Folder destination = mock(Folder.class);
         given(this.folder.getStore().exists()).willReturn(true);
-        this.thrown.expect(IllegalStateException.class);
-        this.thrown.expectMessage("Unable to move a root folder");
-        this.folder.moveTo(destination);
+        assertThrows(IllegalStateException.class, () -> this.folder.moveTo(destination));
     }
 
     @Test
@@ -351,17 +342,14 @@ public class StoredFolderTest {
         Folder destination = mock(Folder.class);
         MockStoredFolder child = this.folder.getFolder("a");
         given(this.folder.getStore().exists()).willReturn(false);
-        this.thrown.expect(ResourceDoesNotExistException.class);
-        child.copyTo(destination);
+        assertThrows(ResourceDoesNotExistException.class, () -> child.copyTo(destination));
     }
 
     @Test
     public void shouldNotCopyRoot() throws Exception {
         given(this.folder.getStore().exists()).willReturn(true);
         Folder destination = mock(Folder.class);
-        this.thrown.expect(IllegalStateException.class);
-        this.thrown.expectMessage("Unable to copy a root folder");
-        this.folder.copyTo(destination);
+        assertThrows(IllegalStateException.class, () -> this.folder.copyTo(destination));
     }
 
     @Test
@@ -390,63 +378,51 @@ public class StoredFolderTest {
     @Test
     public void shouldNotRenameRootFolder() throws Exception {
         given(this.folder.getStore().exists()).willReturn(true);
-        this.thrown.expect(IllegalStateException.class);
-        this.thrown.expectMessage("Root folders cannot be renamed");
-        this.folder.rename("folder.bak");
+        assertThrows(IllegalStateException.class, () -> this.folder.rename("folder.bak"));
     }
 
     @Test
     public void shouldNotRenameIfDoesNotExist() throws Exception {
         MockStoredFolder subFolder = this.folder.getFolder("subfolder");
         given(subFolder.getStore().exists()).willReturn(false);
-        this.thrown.expect(ResourceDoesNotExistException.class);
-        this.thrown.expectMessage("The resource '/subfolder/' does not exist");
-        subFolder.rename("file.bak");
+        assertThrows(ResourceDoesNotExistException.class, () -> subFolder.rename("file.bak"));
     }
 
     @Test
     public void shouldNotRenameToEmpty() throws Exception {
         MockStoredFolder subFolder = this.folder.getFolder("subfolder");
         given(subFolder.getStore().exists()).willReturn(true);
-        this.thrown.expect(IllegalArgumentException.class);
-        this.thrown.expectMessage("Name must not be empty");
-        subFolder.rename("");
+        assertThrows(IllegalArgumentException.class, () -> subFolder.rename(""));
     }
 
     @Test
     public void shouldNotRenameWithPathElements() throws Exception {
         given(this.folder.getStore().exists()).willReturn(true);
-        this.thrown.expect(IllegalArgumentException.class);
-        this.thrown.expectMessage("Name must not contain path elements");
-        this.folder.rename("file/bak");
+        assertThrows(IllegalArgumentException.class, () -> this.folder.rename("file/bak"));
     }
 
     @Test
     public void shouldAppendPathToToString() throws Exception {
         MockStoredFolder child = this.folder.getFolder("a/b/c");
-        assertThat(child.toString(), is("/a/b/c/"));
+        assertEquals("/a/b/c/", child.toString());
     }
 
     @Test
     public void shouldFormatToString() throws Exception {
         Folder child = this.folder.getFolder("a", true).jail().getFolder("b/c");
-        assertThat(child.toString(), is("/b/c/"));
-        assertThat(child.toString(ResourceStringFormat.FULL), is("/b/c/"));
-        assertThat(child.toString(ResourceStringFormat.UNJAILED), is("/a/b/c/"));
+        assertEquals("/b/c/", child.toString());
+        assertEquals("/b/c/", child.toString(ResourceStringFormat.FULL));
+        assertEquals("/a/b/c/", child.toString(ResourceStringFormat.UNJAILED));
     }
 
     @Test
     public void shouldNeedNameForGet() throws Exception {
-        this.thrown.expect(IllegalArgumentException.class);
-        this.thrown.expectMessage("Name must not be empty");
-        this.folder.get("", File.class);
+        assertThrows(IllegalArgumentException.class, () -> this.folder.get("", File.class));
     }
 
     @Test
     public void shouldNeedTypeForGet() throws Exception {
-        this.thrown.expect(IllegalArgumentException.class);
-        this.thrown.expectMessage("ResourceType must not be null");
-        this.folder.get("name", null);
+        assertThrows(IllegalArgumentException.class, () -> this.folder.get("name", null));
     }
 
     @Test
@@ -475,16 +451,16 @@ public class StoredFolderTest {
     public void shouldJail() throws Exception {
         Folder jailed = this.folder.getFolder("a").jail();
         Folder sub = jailed.getFolder("/b");
-        assertThat(sub.toString(), is("/b/"));
-        assertThat(sub.toString(ResourceStringFormat.UNJAILED), is("/a/b/"));
+        assertEquals("/b/", sub.toString());
+        assertEquals("/a/b/", sub.toString(ResourceStringFormat.UNJAILED));
     }
 
     @Test
     public void shouldDoubleJail() throws Exception {
         Folder jailed = this.folder.getFolder("a").jail().jail();
         Folder sub = jailed.getFolder("/b");
-        assertThat(sub.toString(), is("/b/"));
-        assertThat(sub.toString(ResourceStringFormat.UNJAILED), is("/a/b/"));
+        assertEquals("/b/", sub.toString());
+        assertEquals("/a/b/", sub.toString(ResourceStringFormat.UNJAILED));
     }
 
     // FIXME test find

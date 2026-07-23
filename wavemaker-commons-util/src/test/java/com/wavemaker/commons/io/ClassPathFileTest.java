@@ -14,16 +14,14 @@
  ******************************************************************************/
 package com.wavemaker.commons.io;
 
-import org.hamcrest.Matchers;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
 import com.wavemaker.commons.io.exception.ResourceDoesNotExistException;
 
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests for {@link ClassPathFile}.
@@ -32,19 +30,16 @@ import static org.junit.Assert.assertThat;
  */
 public class ClassPathFileTest {
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     @Test
     public void shouldLoadRelativeToClass() throws Exception {
         File file = new ClassPathFile(getClass(), "a.txt");
-        assertThat(file.getContent().asString(), Matchers.is("a"));
+        assertEquals("a", file.getContent().asString());
     }
 
     @Test
     public void shouldLoadFromPathUsingClass() throws Exception {
         File file = new ClassPathFile(getClass(), "/com/wavemaker/commons/io/a.txt");
-        assertThat(file.getContent().asString(), Matchers.is("a"));
+        assertEquals("a", file.getContent().asString());
     }
 
     @Test
@@ -52,25 +47,24 @@ public class ClassPathFileTest {
         ClassPathResource resource = new ClassPathResource("/com/wavemaker/commons/io/a.txt");
         System.out.println(resource.getInputStream());
         File file = new ClassPathFile("/com/wavemaker/commons/io/a.txt");
-        assertThat(file.getContent().asString(), Matchers.is("a"));
+        assertEquals("a", file.getContent().asString());
     }
 
     @Test
     public void shouldSupportNotExists() throws Exception {
         File file = new ClassPathFile("/com/wavemaker/platform/io/missing.txt");
-        assertThat(file.exists(), Matchers.is(false));
+        assertFalse(file.exists());
     }
 
     @Test
     public void shouldThrowOnLoadNotExists() throws Exception {
         File file = new ClassPathFile(getClass(), "missing.txt");
-        this.thrown.expect(ResourceDoesNotExistException.class);
-        file.getContent().asString();
+        assertThrows(ResourceDoesNotExistException.class, () -> file.getContent().asString());
     }
 
     @Test
     public void testGetName() {
         File file = new ClassPathFile(getClass(), "a.txt");
-        Assert.assertEquals(file.getName(), "a.txt");
+        assertEquals("a.txt", file.getName());
     }
 }

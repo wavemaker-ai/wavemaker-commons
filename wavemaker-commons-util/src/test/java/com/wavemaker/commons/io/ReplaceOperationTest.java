@@ -14,10 +14,10 @@
  ******************************************************************************/
 package com.wavemaker.commons.io;
 
-import org.testng.Assert;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.wavemaker.commons.util.WMIOUtils;
 
@@ -27,7 +27,7 @@ public class ReplaceOperationTest {
     private static String toString = "new data";
     private File tempFile;
 
-    @BeforeTest
+    @BeforeEach
     public void beforeTest() {
         tempFile = WMIOUtils.createTempFile("test", ".txt");
         tempFile.getContent().write(fromString);
@@ -37,10 +37,10 @@ public class ReplaceOperationTest {
     public void testPerform() {
         ReplaceOperation replaceOperation = new ReplaceOperation(fromString, toString);
         replaceOperation.perform(tempFile);
-        Assert.assertEquals(tempFile.getContent().asString(), toString);
+        Assertions.assertEquals(tempFile.getContent().asString(), toString);
     }
 
-    @AfterTest
+    @AfterEach
     public void tearDown() {
         tempFile.delete();
     }

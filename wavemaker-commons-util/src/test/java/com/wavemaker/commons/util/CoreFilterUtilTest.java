@@ -18,23 +18,23 @@ import java.util.List;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.testng.Assert;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.jupiter.api.Assertions;
 
 import com.wavemaker.commons.pattern.URLPattern;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CoreFilterUtilTest {
 
     private List<URLPattern> excludedUrl;
 
-    @Before
+    @BeforeEach
     public void initializeExcludedUri() {
         excludedUrl = CoreFilterUtil.extractExcludedUrlsList("/sample/test/url");
     }
@@ -44,7 +44,7 @@ public class CoreFilterUtilTest {
         final HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getRequestURI()).thenReturn("foo/sample/test/url");
         when(request.getContextPath()).thenReturn("foo");
-        Assert.assertTrue(CoreFilterUtil.isExcluded(request, excludedUrl));
+        Assertions.assertTrue(CoreFilterUtil.isExcluded(request, excludedUrl));
     }
 
     @Test
@@ -52,6 +52,6 @@ public class CoreFilterUtilTest {
         final HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getRequestURI()).thenReturn("foo/sample/util/package/url");
         when(request.getContextPath()).thenReturn("foo");
-        Assert.assertFalse(CoreFilterUtil.isExcluded(request, excludedUrl));
+        Assertions.assertFalse(CoreFilterUtil.isExcluded(request, excludedUrl));
     }
 }

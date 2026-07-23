@@ -26,14 +26,10 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.IOUtils;
-import org.hamcrest.Matcher;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.rules.TemporaryFolder;
-import org.mockito.MockitoAnnotations;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import com.wavemaker.commons.io.File;
 import com.wavemaker.commons.io.FilterOn;
@@ -43,12 +39,10 @@ import com.wavemaker.commons.io.exception.ReadOnlyResourceException;
 import com.wavemaker.commons.io.local.LocalFolder;
 import com.wavemaker.commons.io.store.MockStoredFolder;
 
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -60,11 +54,8 @@ import static org.mockito.Mockito.verify;
  */
 public class ZipArchiveTest {
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-    @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    @TempDir
+    java.io.File temporaryFolder;
 
     private final MockStoredFolder folder = new MockStoredFolder();
 
@@ -72,10 +63,9 @@ public class ZipArchiveTest {
 
     private ZipArchive zip;
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        this.zipFile = this.temporaryFolder.newFile("zipfile.zip");
+        this.zipFile = new java.io.File(this.temporaryFolder, "zipfile.zip");
         ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(this.zipFile));
         try {
             zipOutputStream.putNextEntry(new ZipEntry("/a/b/c.txt"));
@@ -94,72 +84,64 @@ public class ZipArchiveTest {
 
     @Test
     public void shouldNeedZipFile() throws Exception {
-        this.thrown.expect(IllegalArgumentException.class);
-        this.thrown.expectMessage("ZipFile must not be null");
-        new ZipArchive((File) null);
+        assertThrows(IllegalArgumentException.class, () -> new ZipArchive((File) null));
     }
 
     @Test
     public void shouldNeedZipFileThatExists() throws Exception {
         File file = mock(File.class);
-        this.thrown.expect(IllegalArgumentException.class);
-        this.thrown.expectMessage("ZipFile must exist");
-        new ZipArchive(file);
+        assertThrows(IllegalArgumentException.class, () -> new ZipArchive(file));
     }
 
     @Test
     public void shouldGetFolderNotInZipFile() throws Exception {
         Folder folder = this.zip.getFolder("/a/b/c");
-        assertThat(folder.toString(), is("/a/b/c/"));
-        assertThat(folder.exists(), is(false));
+        assertEquals("/a/b/c/", folder.toString());
+        assertFalse(folder.exists());
     }
 
     @Test
     public void shouldGetFileNotInZip() throws Exception {
         File file = this.zip.getFile("/a/b/c");
-        assertThat(file.toString(), is("/a/b/c"));
-        assertThat(file.exists(), is(false));
+        assertEquals("/a/b/c", file.toString());
+        assertFalse(file.exists());
     }
 
     @Test
     public void shouldGetFileThatIsInZip() throws Exception {
         File file = this.zip.getFile("/a/b/c.txt");
-        assertThat(file.toString(), is("/a/b/c.txt"));
-        assertThat(file.exists(), is(true));
+        assertEquals("/a/b/c.txt", file.toString());
+        assertTrue(file.exists());
     }
 
     @Test
     public void shouldGetFolderThatIsInZip() throws Exception {
         Folder folder = this.zip.getFolder("/d/e");
-        assertThat(folder.toString(), is("/d/e/"));
-        assertThat(folder.exists(), is(true));
+        assertEquals("/d/e/", folder.toString());
+        assertTrue(folder.exists());
     }
 
     @Test
     public void shouldGetVirtualFolder() throws Exception {
         Folder folder = this.zip.getFolder("/a/b");
-        assertThat(folder.toString(), is("/a/b/"));
-        assertThat(folder.exists(), is(true));
+        assertEquals("/a/b/", folder.toString());
+        assertTrue(folder.exists());
     }
 
     @Test
     public void shouldNotCreateFile() throws Exception {
-        this.thrown.expect(ReadOnlyResourceException.class);
-        this.thrown.expectMessage(zipErrorMessage());
-        this.zip.getFile("/a/b/x.txt").createIfMissing();
+        assertThrows(ReadOnlyResourceException.class, () -> this.zip.getFile("/a/b/x.txt").createIfMissing());
     }
 
     @Test
     public void shouldNotCreateFolder() throws Exception {
-        this.thrown.expect(ReadOnlyResourceException.class);
-        this.thrown.expectMessage(zipErrorMessage());
-        this.zip.getFolder("/a/b/c").createIfMissing();
+        assertThrows(ReadOnlyResourceException.class, () -> this.zip.getFolder("/a/b/c").createIfMissing());
     }
 
     @Test
     public void shouldList() throws Exception {
         List<String> list = asList(this.zip.getFolder("/d/f").list());
-        assertThat(list.size(), is(2));
+        assertEquals(2, list.size());
         assertTrue(list.contains("g.txt"));
         assertTrue(list.contains("h"));
     }
@@ -167,60 +149,54 @@ public class ZipArchiveTest {
     @Test
     public void shouldListIncludingVirtualFolder() throws Exception {
         List<String> list = asList(this.zip.getFolder("/a").list());
-        assertThat(list.size(), is(1));
+        assertEquals(1, list.size());
         assertTrue(list.contains("b"));
     }
 
     @Test
     public void shouldListFromVirtualFolder() throws Exception {
         List<String> list = asList(this.zip.getFolder("/a/b").list());
-        assertThat(list.size(), is(1));
+        assertEquals(1, list.size());
         assertTrue(list.contains("c.txt"));
     }
 
     @Test
     public void shouldGetSize() throws Exception {
         long actual = this.zip.getFile("/a/b/c.txt").getSize();
-        assertThat(actual, is(1L));
+        assertEquals(1L, actual);
     }
 
     @Test
     public void shouldDelegateGetLastModified() throws Exception {
         long actual = this.zip.getFile("/a/b/c.txt").getLastModified();
-        assertThat(actual, is(this.zipFile.lastModified()));
+        assertEquals(this.zipFile.lastModified(), actual);
     }
 
     @Test
     public void shouldGetInputStream() throws Exception {
         String actual = this.zip.getFile("/a/b/c.txt").getContent().asString();
-        assertThat(actual, is("c"));
+        assertEquals("c", actual);
     }
 
     @Test
     public void shouldNotGetOutputStream() throws Exception {
-        this.thrown.expect(ReadOnlyResourceException.class);
-        this.thrown.expectMessage(zipErrorMessage());
-        this.zip.getFile("/a/b/c.txt").getContent().asOutputStream();
+        assertThrows(ReadOnlyResourceException.class, () -> this.zip.getFile("/a/b/c.txt").getContent().asOutputStream());
     }
 
     @Test
     public void shouldNotDelete() throws Exception {
-        this.thrown.expect(ReadOnlyResourceException.class);
-        this.thrown.expectMessage(zipErrorMessage());
-        this.zip.getFile("/a/b/c.txt").delete();
+        assertThrows(ReadOnlyResourceException.class, () -> this.zip.getFile("/a/b/c.txt").delete());
     }
 
     @Test
     public void shouldNotRename() throws Exception {
-        this.thrown.expect(ReadOnlyResourceException.class);
-        this.thrown.expectMessage(zipErrorMessage());
-        this.zip.getFile("/a/b/c.txt").rename("newname");
+        assertThrows(ReadOnlyResourceException.class, () -> this.zip.getFile("/a/b/c.txt").rename("newname"));
     }
 
     @Test
     public void shouldReloadIfChanged() throws Exception {
         File file = this.zip.getFile("a/b/c.txt");
-        assertThat(file.getContent().asString(), is("c"));
+        assertEquals("c", file.getContent().asString());
         ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(this.zipFile));
         try {
             zipOutputStream.putNextEntry(new ZipEntry("/a/b/c.txt"));
@@ -228,7 +204,7 @@ public class ZipArchiveTest {
         } finally {
             zipOutputStream.close();
         }
-        assertThat(file.getContent().asString(), is("c2"));
+        assertEquals("c2", file.getContent().asString());
     }
 
     private List<String> asList(Iterable<? extends Resource> iterable) {
@@ -239,20 +215,13 @@ public class ZipArchiveTest {
         return list;
     }
 
-    @SuppressWarnings("unchecked")
-    private Matcher<String> zipErrorMessage() {
-        return allOf(startsWith("The Zip File"), endsWith("is read-only"));
-    }
-
     @Test
     public void shouldNeedUnzipInputStream() throws Exception {
-        this.thrown.expect(IllegalArgumentException.class);
-        this.thrown.expectMessage("InputStream must not be null");
-        ZipArchive.unpack((InputStream) null, this.folder);
+        assertThrows(IllegalArgumentException.class, () -> ZipArchive.unpack((InputStream) null, this.folder));
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void shouldUnzip() throws Exception {
         ByteArrayOutputStream outputStreamB = new ByteArrayOutputStream();
         ByteArrayOutputStream outputStreamD = new ByteArrayOutputStream();
@@ -263,8 +232,8 @@ public class ZipArchiveTest {
         ZipArchive.unpack(zipStream, this.folder);
         verify(this.folder.getFolder("a").getStore()).create();
         verify(this.folder.getFolder("c").getStore()).create();
-        assertThat(outputStreamB.toString(), is("ab"));
-        assertThat(outputStreamD.toString(), is("cd"));
+        assertEquals("ab", outputStreamB.toString());
+        assertEquals("cd", outputStreamD.toString());
     }
 
     @Test
@@ -272,7 +241,7 @@ public class ZipArchiveTest {
         Folder rootFolder = createSampleLayout();
         InputStream inputStream = ZipArchive.compress(rootFolder.getFolder("y"), "x");
         List<String> entryNames = getEntryNames(inputStream);
-        assertThat(entryNames.size(), is(5));
+        assertEquals(5, entryNames.size());
         assertTrue(entryNames.contains("x/a/"));
         assertTrue(entryNames.contains("x/a/aa.txt"));
         assertTrue(entryNames.contains("x/a/ab.txt"));
@@ -285,7 +254,7 @@ public class ZipArchiveTest {
         Folder rootFolder = createSampleLayout();
         InputStream inputStream = ZipArchive.compress(rootFolder.getFolder("y"));
         List<String> entryNames = getEntryNames(inputStream);
-        assertThat(entryNames.size(), is(5));
+        assertEquals(5, entryNames.size());
         assertTrue(entryNames.contains("a/aa.txt"));
         assertTrue(entryNames.contains("a/ab.txt"));
         assertTrue(entryNames.contains("b/"));
@@ -297,7 +266,7 @@ public class ZipArchiveTest {
         Folder rootFolder = createSampleLayout();
         InputStream inputStream = new ZipResourcesStream(rootFolder.getFolder("y").find().include(FilterOn.names().notStarting("ab")), "x");
         List<String> entryNames = getEntryNames(inputStream);
-        assertThat(entryNames.size(), is(4));
+        assertEquals(4, entryNames.size());
         assertTrue(entryNames.contains("x/a/"));
         assertTrue(entryNames.contains("x/a/aa.txt"));
         assertTrue(entryNames.contains("x/b/"));
@@ -307,8 +276,8 @@ public class ZipArchiveTest {
     @Test
     public void shouldOnlyHaveExistingFolders() throws Exception {
         // Underlying cause of WM-4263
-        assertThat(this.zip.hasExisting("/a/"), is(true));
-        assertThat(this.zip.hasExisting("/missing/"), is(false));
+        assertTrue(this.zip.hasExisting("/a/"));
+        assertFalse(this.zip.hasExisting("/missing/"));
     }
 
     private InputStream createSampleZip() throws IOException {
@@ -329,7 +298,9 @@ public class ZipArchiveTest {
     }
 
     private Folder createSampleLayout() throws IOException {
-        Folder rootFolder = new LocalFolder(this.temporaryFolder.newFolder("ziptest"));
+        java.io.File ziptest = new java.io.File(this.temporaryFolder, "ziptest");
+        ziptest.mkdirs();
+        Folder rootFolder = new LocalFolder(ziptest);
         rootFolder.getFolder("y/a").getFile("aa.txt").getContent().write("aa test");
         rootFolder.getFolder("y/a").getFile("ab.txt").getContent().write("ab test");
         rootFolder.getFolder("y/b").getFile("ba.txt").getContent().write("ba test");

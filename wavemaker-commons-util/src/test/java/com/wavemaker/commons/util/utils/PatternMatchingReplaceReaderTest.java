@@ -22,9 +22,9 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.StandardEnvironment;
 
@@ -34,7 +34,7 @@ public class PatternMatchingReplaceReaderTest {
 
     private static Environment env;
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() {
         env = new StandardEnvironment();// after deployment in tomcat it takes StandardServletEnvironment();
     }
@@ -48,7 +48,7 @@ public class PatternMatchingReplaceReaderTest {
 
         String resolvedString = getResolvedStringForFile(fileName, "${{", "}}");
         String expectedOutput = IOUtils.resourceToString("pattern-matching-reader/expected-file1.txt", StandardCharsets.UTF_8, PatternMatchingReplaceReaderTest.class.getClassLoader());
-        Assert.assertEquals(expectedOutput, resolvedString);
+        Assertions.assertEquals(expectedOutput, resolvedString);
     }
 
     @Test
@@ -63,7 +63,7 @@ public class PatternMatchingReplaceReaderTest {
 
         String resolvedString = getResolvedStringForFile(fileName, "${", "}");
         String expectedOutput = IOUtils.resourceToString("pattern-matching-reader/expected-file2.xml", StandardCharsets.UTF_8, PatternMatchingReplaceReaderTest.class.getClassLoader());
-        Assert.assertEquals(expectedOutput, resolvedString);
+        Assertions.assertEquals(expectedOutput, resolvedString);
     }
 
     private String getResolvedStringForFile(String fileName, String prefix, String suffix) throws IOException {

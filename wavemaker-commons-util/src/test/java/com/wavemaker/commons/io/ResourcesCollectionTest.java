@@ -19,28 +19,25 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.hamcrest.Matchers;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests for {@link ResourcesCollection}.
  *
  * @author Phillip Webb
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ResourcesCollectionTest {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     @Mock
     private Folder source;
@@ -56,34 +53,32 @@ public class ResourcesCollectionTest {
 
     @Test
     public void shouldNeedResources() throws Exception {
-        this.thrown.expect(IllegalArgumentException.class);
-        this.thrown.expectMessage("Resources must not be null");
-        new ResourcesCollection<>(this.source, (Collection<Resource>) null);
+        assertThrows(IllegalArgumentException.class,
+            () -> new ResourcesCollection<>(this.source, (Collection<Resource>) null));
     }
 
     @Test
     public void shouldNeedResourcesArray() throws Exception {
-        this.thrown.expect(IllegalArgumentException.class);
-        this.thrown.expectMessage("Resources must not be null");
-        new ResourcesCollection<>(this.source, (Resource[]) null);
+        assertThrows(IllegalArgumentException.class,
+            () -> new ResourcesCollection<>(this.source, (Resource[]) null));
     }
 
     @Test
     public void shouldIterateCollection() throws Exception {
         ResourcesCollection<Resource> collection = new ResourcesCollection<>(this.source, Arrays.asList(this.folder, this.file));
         Iterator<Resource> iterator = collection.iterator();
-        assertThat(iterator.next(), Matchers.is((Resource) this.folder));
-        assertThat(iterator.next(), Matchers.is((Resource) this.file));
-        assertThat(iterator.hasNext(), Matchers.is(false));
+        assertSame(this.folder, iterator.next());
+        assertSame(this.file, iterator.next());
+        assertFalse(iterator.hasNext());
     }
 
     @Test
     public void shouldIterateArray() throws Exception {
         ResourcesCollection<Resource> collection = new ResourcesCollection<>(this.source, this.folder, this.file);
         Iterator<Resource> iterator = collection.iterator();
-        assertThat(iterator.next(), Matchers.is((Resource) this.folder));
-        assertThat(iterator.next(), Matchers.is((Resource) this.file));
-        assertThat(iterator.hasNext(), Matchers.is(false));
+        assertSame(this.folder, iterator.next());
+        assertSame(this.file, iterator.next());
+        assertFalse(iterator.hasNext());
     }
 
     @Test
@@ -128,9 +123,9 @@ public class ResourcesCollectionTest {
     public void shouldFetchAll() throws Exception {
         ResourcesCollection<Resource> collection = new ResourcesCollection<>(this.source, this.folder, this.file);
         List<Resource> list = collection.fetchAll();
-        assertThat(list.size(), Matchers.is(2));
-        assertThat(list.get(0), Matchers.is((Resource) this.folder));
-        assertThat(list.get(1), Matchers.is((Resource) this.file));
+        assertEquals(2, list.size());
+        assertSame(this.folder, list.get(0));
+        assertSame(this.file, list.get(1));
     }
 
     @Test
@@ -142,9 +137,9 @@ public class ResourcesCollectionTest {
         File e = Mockito.mock(File.class);
         ResourcesCollection<File> collection = new ResourcesCollection<>(this.source, a, b, c, d, e);
         Iterator<File> actual = collection.include(filterOn(a), filterOn(c), filterOn(e)).exclude(filterOn(c)).iterator();
-        assertThat(actual.next(), Matchers.is(a));
-        assertThat(actual.next(), Matchers.is(e));
-        assertThat(actual.hasNext(), Matchers.is(false));
+        assertSame(a, actual.next());
+        assertSame(e, actual.next());
+        assertFalse(actual.hasNext());
     }
 
     private ResourceFilter filterOn(final Resource on) {
