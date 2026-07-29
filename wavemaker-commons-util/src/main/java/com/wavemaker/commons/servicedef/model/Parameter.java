@@ -15,6 +15,7 @@
 package com.wavemaker.commons.servicedef.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * @author <a href="mailto:sunil.pulugula@wavemaker.com">Sunil Kumar</a>
@@ -28,6 +29,8 @@ public class Parameter {
     private String type;
     private boolean readOnly;
     private String contentType;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String collectionFormat;
 
     @JsonIgnore
     public static synchronized Parameter getNewInstance() {
@@ -111,6 +114,19 @@ public class Parameter {
 
     public Parameter addContentType(final String contentType) {
         this.contentType = contentType;
+        return this;
+    }
+
+    public String getCollectionFormat() {
+        return collectionFormat;
+    }
+
+    public void setCollectionFormat(String collectionFormat) {
+        this.collectionFormat = collectionFormat;
+    }
+
+    public Parameter addCollectionFormat(final String collectionFormat) {
+        this.collectionFormat = collectionFormat;
         return this;
     }
 
