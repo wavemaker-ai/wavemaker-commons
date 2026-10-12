@@ -14,23 +14,22 @@
  ******************************************************************************/
 package com.wavemaker.commons.json.serializer;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.SerializationContext;
 
 /**
  * @author Uday Shankar
  */
-public class WMLocalDateTimeSerializer extends JsonSerializer<LocalDateTime> {
+public class WMLocalDateTimeSerializer extends ValueSerializer<LocalDateTime> {
 
     private static final DateTimeFormatter format = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     @Override
-    public void serialize(LocalDateTime value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
+    public void serialize(LocalDateTime value, JsonGenerator jgen, SerializationContext provider) {
         jgen.writeString(value.format(format));
     }
 }

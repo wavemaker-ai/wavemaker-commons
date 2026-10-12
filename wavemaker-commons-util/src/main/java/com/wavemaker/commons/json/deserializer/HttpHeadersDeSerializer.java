@@ -14,32 +14,28 @@
  ******************************************************************************/
 package com.wavemaker.commons.json.deserializer;
 
-import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.ObjectCodec;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * @author Uday Shankar
  */
-public class HttpHeadersDeSerializer extends JsonDeserializer<HttpHeaders> {
+public class HttpHeadersDeSerializer extends ValueDeserializer<HttpHeaders> {
 
     @Override
-    public HttpHeaders deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
-        ObjectCodec codec = jp.getCodec();
-        ObjectNode root = codec.readTree(jp);
-        Map<String, Object> map = ((ObjectMapper) codec).readValue(root.toString(), new TypeReference<LinkedHashMap<String, Object>>() {
-        });
+    public HttpHeaders deserialize(JsonParser jp, DeserializationContext ctxt) {
+        ObjectNode root = (ObjectNode) ctxt.readTree(jp);
+        Map<String, Object> map = ctxt.readTreeAsValue(root, ctxt.getTypeFactory().constructType(new TypeReference<LinkedHashMap<String, Object>>() {
+        }));
         HttpHeaders httpHeaders = new HttpHeaders();
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             Object value = entry.getValue();

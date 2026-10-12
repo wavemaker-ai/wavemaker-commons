@@ -14,17 +14,17 @@
  ******************************************************************************/
 package com.wavemaker.commons.json.module;
 
-import com.fasterxml.jackson.databind.BeanDescription;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializationConfig;
-import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
-import com.fasterxml.jackson.databind.ser.std.BeanSerializerBase;
+import tools.jackson.databind.BeanDescription;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.SerializationConfig;
+import tools.jackson.databind.ser.ValueSerializerModifier;
+import tools.jackson.databind.ser.bean.BeanSerializerBase;
 
 /**
  * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>
  * @since 3/10/18
  */
-public class WMBeanSerializerModifier extends BeanSerializerModifier {
+public class WMBeanSerializerModifier extends ValueSerializerModifier {
 
     private final WMJacksonModule module;
 
@@ -33,8 +33,8 @@ public class WMBeanSerializerModifier extends BeanSerializerModifier {
     }
 
     @Override
-    public JsonSerializer<?> modifySerializer(
-        final SerializationConfig config, final BeanDescription beanDesc, final JsonSerializer<?> serializer) {
+    public ValueSerializer<?> modifySerializer(
+        final SerializationConfig config, final BeanDescription.Supplier beanDesc, final ValueSerializer<?> serializer) {
         if (serializer instanceof BeanSerializerBase) {
             return new CircularLoopHandlingSerializer<>((BeanSerializerBase) serializer,
                 module.isFailOnCircularReferences());

@@ -25,17 +25,23 @@ import java.sql.Date;
 import java.text.SimpleDateFormat;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpHeaders;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.ser.std.SqlDateSerializer;
-import com.fasterxml.jackson.databind.type.TypeFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JacksonModule;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ext.sql.JavaSqlDateSerializer;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
+import tools.jackson.databind.type.TypeFactory;
 import com.wavemaker.commons.MessageResource;
 import com.wavemaker.commons.WMRuntimeException;
+import com.wavemaker.commons.json.deserializer.HttpHeadersDeSerializer;
+import com.wavemaker.commons.json.serializer.HttpHeadersSerializer;
 import com.wavemaker.commons.util.WMIOUtils;
 
 /**
@@ -43,22 +49,27 @@ import com.wavemaker.commons.util.WMIOUtils;
  */
 public class JSONUtils {
 
-    private static final ObjectMapper objectMapper;
+    private static volatile ObjectMapper objectMapper;
 
     static {
-        objectMapper = new ObjectMapper();
-        objectMapper.setTypeFactory(TypeFactory.defaultInstance().withClassLoader(JSONUtils.class.getClassLoader()));
         final SimpleModule module = new SimpleModule();
         module.addSerializer(Date.class,
-            new SqlDateSerializer().withFormat(false, new SimpleDateFormat("yyyy-MM-dd"))
+            new JavaSqlDateSerializer().withFormat(false, new SimpleDateFormat("yyyy-MM-dd"))
         );
-        objectMapper.registerModule(module);
+        module.addSerializer(HttpHeaders.class, new HttpHeadersSerializer());
+        module.addDeserializer(HttpHeaders.class, new HttpHeadersDeSerializer());
+        objectMapper = JsonMapper.builderWithJackson2Defaults()
+            .enable(MapperFeature.DEFAULT_VIEW_INCLUSION)
+            .accessorNaming(new Jackson2AccessorNamingStrategy.Provider())
+            .typeFactory(TypeFactory.createDefaultInstance().withClassLoader(JSONUtils.class.getClassLoader()))
+            .addModule(module)
+            .build();
     }
 
     private JSONUtils() {
     }
 
-    public static String prettifyJSON(String data) throws IOException {
+    public static String prettifyJSON(String data) {
         if (StringUtils.isNotBlank(data)) {
             JsonNode tree = objectMapper.readTree(data);
             return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(tree);
@@ -77,21 +88,21 @@ public class JSONUtils {
     public static String toJSON(Object object) {
         try {
             return toJSON(object, true);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new WMRuntimeException(MessageResource.create("com.wavemaker.commons.objToJsonConversionFailed"), e);
         }
     }
 
-    public static String toJSON(Object object, boolean prettify) throws IOException {
+    public static String toJSON(Object object, boolean prettify) {
         return prettify ? objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(object) : objectMapper
             .writeValueAsString(object);
     }
 
-    public static void toJSON(File outputFile, Object object) throws IOException {
+    public static void toJSON(File outputFile, Object object) {
         toJSON(outputFile, object, true);
     }
 
-    public static void toJSON(File outputFile, Object object, boolean prettify) throws IOException {
+    public static void toJSON(File outputFile, Object object, boolean prettify) {
         if (prettify) {
             objectMapper.writerWithDefaultPrettyPrinter().writeValue(outputFile, object);
         } else {
@@ -99,11 +110,11 @@ public class JSONUtils {
         }
     }
 
-    public static void toJSON(OutputStream outputStream, Object object) throws IOException {
+    public static void toJSON(OutputStream outputStream, Object object) {
         toJSON(outputStream, object, true);
     }
 
-    public static void toJSON(OutputStream outputStream, Object object, boolean prettify) throws IOException {
+    public static void toJSON(OutputStream outputStream, Object object, boolean prettify) {
         try {
             if (prettify) {
                 objectMapper.writerWithDefaultPrettyPrinter().writeValue(outputStream, object);
@@ -115,11 +126,11 @@ public class JSONUtils {
         }
     }
 
-    public static void toJSON(Writer outputWriter, Object object) throws IOException {
+    public static void toJSON(Writer outputWriter, Object object) {
         toJSON(outputWriter, object, true);
     }
 
-    public static void toJSON(Writer outputWriter, Object object, boolean prettify) throws IOException {
+    public static void toJSON(Writer outputWriter, Object object, boolean prettify) {
         try {
             if (prettify) {
                 objectMapper.writerWithDefaultPrettyPrinter().writeValue(outputWriter, object);
@@ -131,11 +142,11 @@ public class JSONUtils {
         }
     }
 
-    public static <T> T toObject(String jsonString, Class<T> t) throws IOException {
+    public static <T> T toObject(String jsonString, Class<T> t) {
         return objectMapper.readValue(jsonString, t);
     }
 
-    public static <T> T toObject(Reader jsonReader, Class<T> t) throws IOException {
+    public static <T> T toObject(Reader jsonReader, Class<T> t) {
         try {
             return objectMapper.readValue(jsonReader, t);
         } finally {
@@ -143,7 +154,7 @@ public class JSONUtils {
         }
     }
 
-    public static <T> T toObject(InputStream jsonStream, Class<T> t) throws IOException {
+    public static <T> T toObject(InputStream jsonStream, Class<T> t) {
         try {
             return objectMapper.readValue(jsonStream, t);
         } finally {
@@ -151,19 +162,19 @@ public class JSONUtils {
         }
     }
 
-    public static <T> T toObject(File file, Class<T> targetClass) throws IOException {
+    public static <T> T toObject(File file, Class<T> targetClass) {
         return objectMapper.readValue(file, targetClass);
     }
 
-    public static <T> T toObject(File file, JavaType javaType) throws IOException {
+    public static <T> T toObject(File file, JavaType javaType) {
         return objectMapper.readValue(file, javaType);
     }
 
-    public static <T> T toObject(String jsonString, TypeReference<T> valueTypeRef) throws IOException {
+    public static <T> T toObject(String jsonString, TypeReference<T> valueTypeRef) {
         return objectMapper.readValue(jsonString, valueTypeRef);
     }
 
-    public static <T> T toObject(InputStream inputStream, TypeReference<T> typeReference) throws IOException {
+    public static <T> T toObject(InputStream inputStream, TypeReference<T> typeReference) {
         try {
             return objectMapper.readValue(inputStream, typeReference);
         } finally {
@@ -171,7 +182,7 @@ public class JSONUtils {
         }
     }
 
-    public static <T> T toObject(Reader reader, TypeReference<T> typeReference) throws IOException {
+    public static <T> T toObject(Reader reader, TypeReference<T> typeReference) {
         try {
             return objectMapper.readValue(reader, typeReference);
         } finally {
@@ -183,14 +194,18 @@ public class JSONUtils {
         return objectMapper.convertValue(object, targetClass);
     }
 
-    public static void registerModule(Module module) {
-        objectMapper.registerModule(module);
+    public static synchronized void registerModule(JacksonModule module) {
+        boolean registered = objectMapper.registeredModules().stream()
+            .anyMatch(registeredModule -> registeredModule.getRegistrationId().equals(module.getRegistrationId()));
+        if (!registered) {
+            objectMapper = objectMapper.rebuild().addModule(module).build();
+        }
     }
 
     public static JsonNode readTree(InputStream inputStream) {
         try {
             return objectMapper.readTree(inputStream);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new WMRuntimeException(MessageResource.create("com.wavemaker.commons.jsonData.parse.failed"), e);
         } finally {
             WMIOUtils.closeSilently(inputStream);
@@ -200,7 +215,7 @@ public class JSONUtils {
     public static JsonNode readTree(String str) {
         try {
             return objectMapper.readTree(str);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new WMRuntimeException(MessageResource.create("com.wavemaker.commons.jsonData.parse.failed"), e);
         }
     }

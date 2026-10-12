@@ -14,16 +14,16 @@
  ******************************************************************************/
 package com.wavemaker.commons.json.module;
 
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.core.json.PackageVersion;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
+import tools.jackson.core.Version;
+import tools.jackson.core.json.PackageVersion;
+import tools.jackson.databind.JacksonModule;
+import tools.jackson.databind.ser.ValueSerializerModifier;
 
 /**
  * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>
  * @since 3/10/18
  */
-public class WMJacksonModule extends Module {
+public class WMJacksonModule extends JacksonModule {
 
     private final boolean failOnCircularReferences;
 
@@ -44,9 +44,9 @@ public class WMJacksonModule extends Module {
     @Override
     public void setupModule(final SetupContext setupContext) {
 
-        BeanSerializerModifier serializerModifier = new WMBeanSerializerModifier(this);
+        ValueSerializerModifier serializerModifier = new WMBeanSerializerModifier(this);
 
-        setupContext.addBeanSerializerModifier(serializerModifier);
+        setupContext.addSerializerModifier(serializerModifier);
     }
 
     public boolean isFailOnCircularReferences() {

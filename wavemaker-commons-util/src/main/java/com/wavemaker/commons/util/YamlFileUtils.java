@@ -21,16 +21,18 @@ import java.util.Properties;
 
 import org.springframework.core.io.FileSystemResource;
 
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import tools.jackson.dataformat.yaml.YAMLWriteFeature;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.commons.io.File;
 import com.wavemaker.commons.io.local.LocalFile;
 
 public class YamlFileUtils {
 
-    private static final YAMLMapper yamlMapper = new YAMLMapper()
-        .configure(YAMLGenerator.Feature.WRITE_DOC_START_MARKER, false);
+    private static final YAMLMapper yamlMapper = YAMLMapper.builder()
+        .configureForJackson2()
+        .disable(YAMLWriteFeature.WRITE_DOC_START_MARKER)
+        .build();
 
     public static Properties loadPropertiesFromYamlFile(File file) {
         WMYamlProcessor wmYamlProcessor = new WMYamlProcessor();

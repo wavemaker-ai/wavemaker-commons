@@ -14,24 +14,22 @@
  ******************************************************************************/
 package com.wavemaker.commons.json.serializer;
 
-import java.io.IOException;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.SerializationContext;
 import com.wavemaker.commons.util.StringUtils;
 
 /**
  * @author Uday Shankar
  */
-public class ByteArrayToStringSerializer extends JsonSerializer<byte[]> {
+public class ByteArrayToStringSerializer extends ValueSerializer<byte[]> {
 
     public ByteArrayToStringSerializer() {
         super();
     }
 
     @Override
-    public void serialize(byte[] value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
+    public void serialize(byte[] value, JsonGenerator jgen, SerializationContext provider) {
         jgen.writeString(StringUtils.getStringFromBytes(value));
     }
 }

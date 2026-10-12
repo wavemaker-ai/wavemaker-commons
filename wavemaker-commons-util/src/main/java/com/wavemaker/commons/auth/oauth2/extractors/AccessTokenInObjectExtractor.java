@@ -14,7 +14,6 @@
  ******************************************************************************/
 package com.wavemaker.commons.auth.oauth2.extractors;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -22,7 +21,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DatabindException;
 import com.wavemaker.commons.json.JSONUtils;
 
 /**
@@ -45,9 +45,9 @@ public class AccessTokenInObjectExtractor implements AccessTokenExtractor {
                 Map<Object, Object> accessTokenMap = (Map<Object, Object>) accessTokenObject;
                 accessToken = (String) accessTokenMap.get("token");
             }
-        } catch (JsonMappingException e) {
+        } catch (DatabindException e) {
             //do nothing
-        } catch (IOException ioe) {
+        } catch (JacksonException ioe) {
             logger.warn("Failed to extract access_token.token path in json string", ioe);
         }
         return accessToken;

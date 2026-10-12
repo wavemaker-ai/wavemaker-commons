@@ -14,23 +14,21 @@
  ******************************************************************************/
 package com.wavemaker.commons.json.serializer;
 
-import java.io.IOException;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.SerializationContext;
 
 /**
  * Created by sunilp on 10/12/14.
  */
-public class NoOpByteArraySerializer extends JsonSerializer<byte[]> {
+public class NoOpByteArraySerializer extends ValueSerializer<byte[]> {
 
     public NoOpByteArraySerializer() {
         super();
     }
 
     @Override
-    public void serialize(byte[] value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
+    public void serialize(byte[] value, JsonGenerator jgen, SerializationContext provider) {
         jgen.writeBinary("".getBytes());
     }
 }

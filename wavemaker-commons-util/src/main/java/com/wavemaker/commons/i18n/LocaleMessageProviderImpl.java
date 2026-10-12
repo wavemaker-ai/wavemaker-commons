@@ -32,7 +32,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.wavemaker.commons.MessageResource;
@@ -139,7 +140,7 @@ public class LocaleMessageProviderImpl implements LocaleMessageProvider {
                 });
                 existingMessages.putAll(localeMessages);
             }
-        } catch (IOException e) {
+        } catch (IOException | JacksonException e) {
             throw new WMRuntimeException("Failed to read locale resources for locale " + locale, e);
         }
         return existingMessages;

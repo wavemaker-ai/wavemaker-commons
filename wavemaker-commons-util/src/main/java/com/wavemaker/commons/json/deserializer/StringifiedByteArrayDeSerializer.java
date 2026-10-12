@@ -14,20 +14,19 @@
  ******************************************************************************/
 package com.wavemaker.commons.json.deserializer;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
 
 /**
  * @author Uday Shankar
  */
-public class StringifiedByteArrayDeSerializer extends JsonDeserializer<byte[]> {
+public class StringifiedByteArrayDeSerializer extends ValueDeserializer<byte[]> {
 
     @Override
-    public byte[] deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+    public byte[] deserialize(JsonParser p, DeserializationContext ctxt) {
         return p.getValueAsString().getBytes(StandardCharsets.UTF_8);
     }
 }

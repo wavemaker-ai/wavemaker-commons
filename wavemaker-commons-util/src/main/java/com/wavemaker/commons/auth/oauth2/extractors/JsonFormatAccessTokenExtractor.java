@@ -16,7 +16,7 @@ package com.wavemaker.commons.auth.oauth2.extractors;
 
 import org.springframework.http.MediaType;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import com.wavemaker.commons.auth.oauth2.OAuth2Constants;
 import com.wavemaker.commons.json.JSONUtils;
 
@@ -27,7 +27,7 @@ public class JsonFormatAccessTokenExtractor extends MediaTypeBasedAccessTokenExt
 
     @Override
     public boolean canRead(MediaType mediaType) {
-        return MediaType.APPLICATION_JSON.equals(mediaType) || MediaType.APPLICATION_JSON_UTF8.equals(mediaType);
+        return MediaType.APPLICATION_JSON.equals(mediaType) || MediaType.parseMediaType("application/json;charset=UTF-8").equals(mediaType);
     }
 
     @Override
