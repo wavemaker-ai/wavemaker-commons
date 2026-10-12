@@ -14,7 +14,6 @@
  ******************************************************************************/
 package com.wavemaker.commons.json.deserializer;
 
-import java.io.IOException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -25,10 +24,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.deser.std.DateDeserializers;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.deser.jdk.JavaUtilDateDeserializer;
 import com.wavemaker.commons.MessageResource;
 import com.wavemaker.commons.WMRuntimeException;
 
@@ -37,7 +36,7 @@ import com.wavemaker.commons.WMRuntimeException;
  *
  * @author Uday Shankar
  */
-public class WMDateDeSerializer extends DateDeserializers.DateDeserializer {
+public class WMDateDeSerializer extends JavaUtilDateDeserializer {
 
     private static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
     private static final String DEFAULT_TIME_FORMAT = "HH:mm:ss";
@@ -46,8 +45,8 @@ public class WMDateDeSerializer extends DateDeserializers.DateDeserializer {
     private static final Logger logger = LoggerFactory.getLogger(WMDateDeSerializer.class);
 
     @Override
-    public Date deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
-        JsonToken currentToken = jsonParser.getCurrentToken();
+    public Date deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) {
+        JsonToken currentToken = jsonParser.currentToken();
         if (currentToken == JsonToken.VALUE_STRING) {
             String value = jsonParser.getText();
             return getDate(value);

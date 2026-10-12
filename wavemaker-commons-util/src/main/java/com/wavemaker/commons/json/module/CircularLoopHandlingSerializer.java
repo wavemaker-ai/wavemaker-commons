@@ -14,7 +14,6 @@
  ******************************************************************************/
 package com.wavemaker.commons.json.module;
 
-import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
@@ -22,26 +21,23 @@ import java.util.Iterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.BeanProperty;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonFormatVisitorWrapper;
-import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
-import com.fasterxml.jackson.databind.ser.ContextualSerializer;
-import com.fasterxml.jackson.databind.ser.PropertyWriter;
-import com.fasterxml.jackson.databind.ser.ResolvableSerializer;
-import com.fasterxml.jackson.databind.ser.std.BeanSerializerBase;
-import com.fasterxml.jackson.databind.util.NameTransformer;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.BeanProperty;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.DatabindException;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.jsonFormatVisitors.JsonFormatVisitorWrapper;
+import tools.jackson.databind.jsontype.TypeSerializer;
+import tools.jackson.databind.ser.PropertyWriter;
+import tools.jackson.databind.ser.bean.BeanSerializerBase;
+import tools.jackson.databind.util.NameTransformer;
 
 /**
  * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>
  * @since 3/10/18
  */
-public class CircularLoopHandlingSerializer<T> extends JsonSerializer<T> implements ResolvableSerializer,
-    ContextualSerializer {
+public class CircularLoopHandlingSerializer<T> extends ValueSerializer<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CircularLoopHandlingSerializer.class);
     /**
@@ -59,7 +55,7 @@ public class CircularLoopHandlingSerializer<T> extends JsonSerializer<T> impleme
 
     @Override
     public void serialize(
-        final T value, final JsonGenerator gen, final SerializerProvider serializers) throws IOException {
+        final T value, final JsonGenerator gen, final SerializationContext serializers) {
         LOGGER.debug("Serialization started for :{}", value.getClass());
 
         if (hasCyclicReference(value) && !delegate.usesObjectId()) {
@@ -77,36 +73,36 @@ public class CircularLoopHandlingSerializer<T> extends JsonSerializer<T> impleme
     }
 
     @Override
-    public JsonSerializer<?> createContextual(
-        final SerializerProvider prov, final BeanProperty property) throws JsonMappingException {
-        final JsonSerializer<?> contextual = delegate.createContextual(prov, property);
+    public ValueSerializer<?> createContextual(
+        final SerializationContext prov, final BeanProperty property) {
+        final ValueSerializer<?> contextual = delegate.createContextual(prov, property);
         return wrapIfNeeded(contextual);
     }
 
     @Override
-    public void resolve(final SerializerProvider provider) throws JsonMappingException {
+    public void resolve(final SerializationContext provider) {
         delegate.resolve(provider);
     }
 
     @Override
-    public JsonSerializer<T> unwrappingSerializer(final NameTransformer unwrapper) {
-        return (JsonSerializer<T>) wrapIfNeeded(delegate.unwrappingSerializer(unwrapper));
+    public ValueSerializer<T> unwrappingSerializer(final NameTransformer unwrapper) {
+        return (ValueSerializer<T>) wrapIfNeeded(delegate.unwrappingSerializer(unwrapper));
     }
 
     @Override
-    public JsonSerializer<T> replaceDelegatee(final JsonSerializer<?> delegatee) {
-        return (JsonSerializer<T>) wrapIfNeeded(delegate.replaceDelegatee(delegatee));
+    public ValueSerializer<T> replaceDelegatee(final ValueSerializer<?> delegatee) {
+        return (ValueSerializer<T>) wrapIfNeeded(delegate.replaceDelegatee(delegatee));
     }
 
     @Override
-    public JsonSerializer<?> withFilterId(final Object filterId) {
+    public ValueSerializer<?> withFilterId(final Object filterId) {
         return wrapIfNeeded(delegate.withFilterId(filterId));
     }
 
     @Override
     public void serializeWithType(
-        final T value, final JsonGenerator gen, final SerializerProvider serializers,
-        final TypeSerializer typeSer) throws IOException {
+        final T value, final JsonGenerator gen, final SerializationContext serializers,
+        final TypeSerializer typeSer) {
         delegate.serializeWithType(value, gen, serializers, typeSer);
     }
 
@@ -116,12 +112,7 @@ public class CircularLoopHandlingSerializer<T> extends JsonSerializer<T> impleme
     }
 
     @Override
-    public boolean isEmpty(final T value) {
-        return delegate.isEmpty(value);
-    }
-
-    @Override
-    public boolean isEmpty(final SerializerProvider provider, final T value) {
+    public boolean isEmpty(final SerializationContext provider, final T value) {
         return delegate.isEmpty(provider, value);
     }
 
@@ -136,7 +127,7 @@ public class CircularLoopHandlingSerializer<T> extends JsonSerializer<T> impleme
     }
 
     @Override
-    public JsonSerializer<?> getDelegatee() {
+    public ValueSerializer<?> getDelegatee() {
         return delegate.getDelegatee();
     }
 
@@ -147,7 +138,7 @@ public class CircularLoopHandlingSerializer<T> extends JsonSerializer<T> impleme
 
     @Override
     public void acceptJsonFormatVisitor(
-        final JsonFormatVisitorWrapper visitor, final JavaType type) throws JsonMappingException {
+        final JsonFormatVisitorWrapper visitor, final JavaType type) {
         delegate.acceptJsonFormatVisitor(visitor, type);
     }
 
@@ -178,14 +169,14 @@ public class CircularLoopHandlingSerializer<T> extends JsonSerializer<T> impleme
             getObjectRefStack().contains(value);
     }
 
-    public void handleCyclicReference(final JsonGenerator jgen, SerializerProvider provider) throws IOException {
+    public void handleCyclicReference(final JsonGenerator jgen, SerializationContext provider) {
         String refStack = printableRefStack();
         if (failOnCircularReferences) {
-            throw new JsonMappingException(jgen,
-                "Cyclic-reference leading to cycle, Object Reference Stack:" + refStack);
+            throw DatabindException.from(jgen,
+                "Cyclic-reference leading to cycle, Object Reference Stack:" + refStack).clearLocation();
         }
         // else serializing as NULL.
-        provider.defaultSerializeValue(null, jgen);
+        provider.defaultSerializeNullValue(jgen);
     }
 
     private String printableRefStack() {
@@ -207,7 +198,7 @@ public class CircularLoopHandlingSerializer<T> extends JsonSerializer<T> impleme
         return objectReferenceStackTL.get();
     }
 
-    private JsonSerializer wrapIfNeeded(JsonSerializer serializer) {
+    private ValueSerializer wrapIfNeeded(ValueSerializer serializer) {
         return serializer instanceof BeanSerializerBase ?
             new CircularLoopHandlingSerializer<>((BeanSerializerBase) serializer, failOnCircularReferences)
             : serializer;

@@ -14,7 +14,6 @@
  ******************************************************************************/
 package com.wavemaker.commons.auth.oauth2;
 
-import java.io.IOException;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +25,7 @@ import org.apache.commons.text.StringSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import tools.jackson.core.JacksonException;
 import com.wavemaker.commons.MessageResource;
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.commons.auth.oauth2.extractors.AccessTokenRequestContext;
@@ -75,7 +75,7 @@ public class OAuth2Helper {
         String stateParam = new String(Base64.getDecoder().decode(stateParameter));
         try {
             return JSONUtils.toObject(stateParam, Map.class);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new WMRuntimeException(e);
         }
     }

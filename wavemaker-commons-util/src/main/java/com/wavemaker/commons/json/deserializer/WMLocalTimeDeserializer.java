@@ -14,29 +14,28 @@
  ******************************************************************************/
 package com.wavemaker.commons.json.deserializer;
 
-import java.io.IOException;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
 import com.wavemaker.commons.MessageResource;
 import com.wavemaker.commons.WMRuntimeException;
 
 /**
  * Created by saddhamp on 11/7/16.
  */
-public class WMLocalTimeDeserializer extends JsonDeserializer<LocalTime> {
+public class WMLocalTimeDeserializer extends ValueDeserializer<LocalTime> {
 
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
     @Override
-    public LocalTime deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
-        JsonToken currentToken = jsonParser.getCurrentToken();
+    public LocalTime deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) {
+        JsonToken currentToken = jsonParser.currentToken();
         if (currentToken == JsonToken.VALUE_STRING) {
             String value = jsonParser.getText();
             return getLocalDateTime(value);
