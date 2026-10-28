@@ -14,6 +14,9 @@
  ******************************************************************************/
 package com.wavemaker.commons.json;
 
+import tools.jackson.databind.AnnotationIntrospector;
+import tools.jackson.databind.BeanDescription;
+import tools.jackson.databind.annotation.JsonPOJOBuilder;
 import tools.jackson.databind.cfg.MapperConfig;
 import tools.jackson.databind.introspect.AccessorNamingStrategy;
 import tools.jackson.databind.introspect.AnnotatedClass;
@@ -23,6 +26,11 @@ public class Jackson2AccessorNamingStrategy extends DefaultAccessorNamingStrateg
 
     public Jackson2AccessorNamingStrategy(MapperConfig<?> config, AnnotatedClass forClass) {
         super(config, forClass, "set", "get", "is", null);
+    }
+
+    protected Jackson2AccessorNamingStrategy(MapperConfig<?> config, AnnotatedClass forClass, String mutatorPrefix,
+                                             String getterPrefix, String isGetterPrefix, BaseNameValidator baseNameValidator) {
+        super(config, forClass, mutatorPrefix, getterPrefix, isGetterPrefix, baseNameValidator);
     }
 
     @Override
@@ -55,6 +63,14 @@ public class Jackson2AccessorNamingStrategy extends DefaultAccessorNamingStrateg
         @Override
         public AccessorNamingStrategy forPOJO(MapperConfig<?> config, AnnotatedClass forClass) {
             return new Jackson2AccessorNamingStrategy(config, forClass);
+        }
+
+        @Override
+        public AccessorNamingStrategy forBuilder(MapperConfig<?> config, AnnotatedClass builderClass, BeanDescription valueTypeDesc) {
+            AnnotationIntrospector introspector = config.isAnnotationProcessingEnabled() ? config.getAnnotationIntrospector() : null;
+            JsonPOJOBuilder.Value builderConfig = introspector == null ? null : introspector.findPOJOBuilderConfig(config, builderClass);
+            String mutatorPrefix = builderConfig == null ? _withPrefix : builderConfig.withPrefix;
+            return new Jackson2AccessorNamingStrategy(config, builderClass, mutatorPrefix, _getterPrefix, _isGetterPrefix, _baseNameValidator);
         }
     }
 }
